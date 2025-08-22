@@ -2,6 +2,8 @@ import type { FormEvent } from "react";
 import { useState, useEffect } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Mail, Lock, Loader2 } from "lucide-react";
+import { toast } from "react-hot-toast";
+
 
 interface LoginFormData {
   email: string;
@@ -19,13 +21,10 @@ export default function Login() {
   const [formData, setFormData] = useState<LoginFormData>({ email: "", password: "" });
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [loading, setLoading] = useState(false);
-  const [backendError, setBackendError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Afficher message de succès si redirigé depuis l'inscription
   useEffect(() => {
     if (location.state?.message) {
-      setSuccessMessage(location.state.message);
+      toast.success(location.state.message);
       navigate(location.pathname, { replace: true });
     }
   }, [location.state, navigate, location.pathname]);
@@ -51,7 +50,6 @@ export default function Login() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setBackendError(null);
 
     if (!validateForm()) return;
 
@@ -66,16 +64,15 @@ export default function Login() {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.accessToken) {
-          localStorage.setItem("accessToken", data.accessToken);
-        }
+        if (data.accessToken) localStorage.setItem("accessToken", data.accessToken);
+        toast.success("Connexion réussie !");
         navigate("/profile");
       } else {
         const errorData = await response.json();
-        setBackendError(errorData.message || "Identifiants invalides");
+        toast.error(errorData.message || "Identifiants invalides");
       }
     } catch {
-      setBackendError("Erreur de connexion au serveur");
+      toast.error("Erreur de connexion au serveur");
     } finally {
       setLoading(false);
     }
@@ -83,6 +80,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-background px-4">
+
       <div className="w-full max-w-md">
         {/* Logo et titre */}
         <div className="text-center mb-4 p-2">
@@ -92,18 +90,6 @@ export default function Login() {
 
         {/* Carte */}
         <div className="bg-card border border-border rounded-2xl shadow-lg p-8">
-          {successMessage && (
-            <div className="mb-4 rounded-md bg-green-50 p-3 text-green-700 text-sm font-medium">
-              ✅ {successMessage}
-            </div>
-          )}
-
-          {backendError && (
-            <div className="mb-4 rounded-md bg-red-50 p-3 text-red-700 text-sm font-medium">
-              ❌ {backendError}
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
             <div>
@@ -121,7 +107,6 @@ export default function Login() {
                   required
                 />
               </div>
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
 
             {/* Password */}
@@ -140,7 +125,6 @@ export default function Login() {
                   required
                 />
               </div>
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
             </div>
 
             {/* Bouton */}

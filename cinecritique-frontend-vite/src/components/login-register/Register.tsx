@@ -2,6 +2,7 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Mail, Lock, User, Home, Calendar, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface RegisterFormData {
   email: string;
@@ -36,7 +37,6 @@ export default function Register() {
   });
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [loading, setLoading] = useState(false);
-  const [backendError, setBackendError] = useState<string | null>(null);
 
   const validateForm = (): boolean => {
     const newErrors: ValidationErrors = {};
@@ -73,8 +73,6 @@ export default function Register() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setBackendError(null);
-
     if (!validateForm()) return;
 
     setLoading(true);
@@ -95,15 +93,14 @@ export default function Register() {
       });
 
       if (response.ok) {
-        navigate("/login", {
-          state: { message: "Inscription réussie ! Vous pouvez maintenant vous connecter." },
-        });
+        toast.success("Inscription réussie ! Vous pouvez maintenant vous connecter.");
+        navigate("/login");
       } else {
         const errorData = await response.json();
-        setBackendError(errorData.message || "Erreur lors de l'inscription");
+        toast.error(errorData.message || "Erreur lors de l'inscription");
       }
     } catch {
-      setBackendError("Erreur de connexion au serveur");
+      toast.error("Erreur de connexion au serveur");
     } finally {
       setLoading(false);
     }
@@ -111,6 +108,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex flex-col justify-center items-center bg-background px-4 pt-6 pb-20">
+
       <div className="w-full max-w-md">
         {/* Logo et titre */}
         <div className="text-center mb-8">
@@ -120,12 +118,6 @@ export default function Register() {
 
         {/* Carte */}
         <div className="bg-card border border-border rounded-2xl shadow-lg p-8">
-          {backendError && (
-            <div className="mb-4 rounded-md bg-red-50 p-3 text-red-700 text-sm font-medium">
-              ❌ {backendError}
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Prénom */}
             <div>
@@ -138,14 +130,11 @@ export default function Register() {
                   type="text"
                   value={formData.prenom}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${
-                    errors.prenom ? "border-red-500" : "border-border"
-                  } bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
+                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${errors.prenom ? "border-red-500" : "border-border"} bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
                   placeholder="Votre prénom"
                   required
                 />
               </div>
-              {errors.prenom && <p className="mt-1 text-sm text-red-600">{errors.prenom}</p>}
             </div>
 
             {/* Nom */}
@@ -159,14 +148,11 @@ export default function Register() {
                   type="text"
                   value={formData.nom}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${
-                    errors.nom ? "border-red-500" : "border-border"
-                  } bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
+                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${errors.nom ? "border-red-500" : "border-border"} bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
                   placeholder="Votre nom"
                   required
                 />
               </div>
-              {errors.nom && <p className="mt-1 text-sm text-red-600">{errors.nom}</p>}
             </div>
 
             {/* Email */}
@@ -180,14 +166,11 @@ export default function Register() {
                   type="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${
-                    errors.email ? "border-red-500" : "border-border"
-                  } bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
+                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${errors.email ? "border-red-500" : "border-border"} bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
                   placeholder="votre@email.com"
                   required
                 />
               </div>
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
             </div>
 
             {/* Adresse */}
@@ -201,14 +184,11 @@ export default function Register() {
                   type="text"
                   value={formData.adresse}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${
-                    errors.adresse ? "border-red-500" : "border-border"
-                  } bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
+                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${errors.adresse ? "border-red-500" : "border-border"} bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
                   placeholder="Votre adresse"
                   required
                 />
               </div>
-              {errors.adresse && <p className="mt-1 text-sm text-red-600">{errors.adresse}</p>}
             </div>
 
             {/* Âge */}
@@ -223,14 +203,11 @@ export default function Register() {
                   min="1"
                   value={formData.age || ""}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${
-                    errors.age ? "border-red-500" : "border-border"
-                  } bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
+                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${errors.age ? "border-red-500" : "border-border"} bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
                   placeholder="25"
                   required
                 />
               </div>
-              {errors.age && <p className="mt-1 text-sm text-red-600">{errors.age}</p>}
             </div>
 
             {/* Mot de passe */}
@@ -244,14 +221,11 @@ export default function Register() {
                   type="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${
-                    errors.password ? "border-red-500" : "border-border"
-                  } bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
+                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${errors.password ? "border-red-500" : "border-border"} bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
                   placeholder="Votre mot de passe"
                   required
                 />
               </div>
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
             </div>
 
             {/* Confirmation */}
@@ -265,14 +239,11 @@ export default function Register() {
                   type="password"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${
-                    errors.confirmPassword ? "border-red-500" : "border-border"
-                  } bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
+                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${errors.confirmPassword ? "border-red-500" : "border-border"} bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
                   placeholder="Confirmez le mot de passe"
                   required
                 />
               </div>
-              {errors.confirmPassword && <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>}
             </div>
 
             {/* Bouton */}
