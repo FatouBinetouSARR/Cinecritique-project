@@ -1,10 +1,10 @@
 import { Routes, Route } from "react-router-dom";
-import { HomePage } from "./HomePage";
+import { HomePage } from "./components/Home/HomePage";
 import { Layout } from "./Layout";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Profile from "./pages/Profile";
-import { PrivateRoute } from "./components/PrivateRoute";
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
+import Profile from "./components/profile/Profile";
+import { PrivateRoute } from "./components/routing/PrivateRoute";
 
 const App: React.FC = () => {
   return (
