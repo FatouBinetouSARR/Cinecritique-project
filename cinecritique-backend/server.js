@@ -37,7 +37,7 @@ const ACCESS_TOKEN_EXPIRES_IN = process.env.ACCESS_TOKEN_EXPIRES_IN || "15m";
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || "7d";
 
 // "Base de données" en mémoire (à remplacer par une vraie DB)
-const users = new Map(); // key: email, value: { id, email, passwordHash }
+const users = new Map(); // key: email, value: { id, email, prenom, nom, adresse, age, passwordHash }
 const refreshTokensStore = new Map(); // key: refreshToken, value: { userId, rotationCounter }
 let userAutoIncrementId = 1;
 
@@ -98,17 +98,32 @@ app.get("/", (req, res) => {
 
 // Inscription
 app.post("/api/auth/register", async (req, res) => {
-  const { email, password } = req.body || {};
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email et mot de passe requis" });
+  const { email, password, prenom, nom, adresse, age } = req.body || {};
+  if (!email || !password || !prenom || !nom || !adresse || !age) {
+    return res.status(400).json({ message: "Tous les champs sont requis" });
   }
+  
+  // Validation de l'âge
+  if (age <= 0) {
+    return res.status(400).json({ message: "L'âge doit être supérieur à 0" });
+  }
+  
   const normalizedEmail = String(email).toLowerCase().trim();
   if (users.has(normalizedEmail)) {
     return res.status(409).json({ message: "Utilisateur déjà existant" });
   }
+  
   try {
     const passwordHash = await bcrypt.hash(password, 10);
-    const newUser = { id: userAutoIncrementId++, email: normalizedEmail, passwordHash };
+    const newUser = { 
+      id: userAutoIncrementId++, 
+      email: normalizedEmail, 
+      prenom: String(prenom).trim(),
+      nom: String(nom).trim(),
+      adresse: String(adresse).trim(),
+      age: parseInt(age),
+      passwordHash 
+    };
     users.set(normalizedEmail, newUser);
 
     const { accessToken, refreshToken } = generateTokens(newUser);
@@ -117,7 +132,14 @@ app.post("/api/auth/register", async (req, res) => {
     setRefreshTokenCookie(res, refreshToken);
 
     return res.status(201).json({
-      user: { id: newUser.id, email: newUser.email },
+      user: { 
+        id: newUser.id, 
+        email: newUser.email,
+        prenom: newUser.prenom,
+        nom: newUser.nom,
+        adresse: newUser.adresse,
+        age: newUser.age
+      },
       accessToken,
     });
   } catch (err) {
@@ -145,10 +167,17 @@ app.post("/api/auth/login", async (req, res) => {
   refreshTokensStore.set(refreshToken, { userId: existingUser.id, rotationCounter: 1 });
   setRefreshTokenCookie(res, refreshToken);
 
-  return res.status(200).json({
-    user: { id: existingUser.id, email: existingUser.email },
-    accessToken,
-  });
+      return res.status(200).json({
+      user: { 
+        id: existingUser.id, 
+        email: existingUser.email,
+        prenom: existingUser.prenom,
+        nom: existingUser.nom,
+        adresse: existingUser.adresse,
+        age: existingUser.age
+      },
+      accessToken,
+    });
 });
 
 // Refresh Token (rotation)
@@ -206,7 +235,14 @@ app.get("/api/profile", authenticateAccessToken, (req, res) => {
   if (!user) {
     return res.status(404).json({ message: "Utilisateur non trouvé" });
   }
-  return res.status(200).json({ id: user.id, email: user.email });
+  return res.status(200).json({ 
+    id: user.id, 
+    email: user.email,
+    prenom: user.prenom,
+    nom: user.nom,
+    adresse: user.adresse,
+    age: user.age
+  });
 });
 
 // Démarrer le serveur
