@@ -1,6 +1,6 @@
 import React from "react";
 import { MovieCard } from "./components/movies/MovieCard";
-import { Button } from "./components/ui/Button";
+import { Button } from "./components/ui/button";
 import { TrendingUp, Star, Users } from "lucide-react";
 
 const popularMovies = [

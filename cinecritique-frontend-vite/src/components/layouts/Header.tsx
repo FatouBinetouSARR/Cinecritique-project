@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Search, User, Star } from "lucide-react";
-import { Button } from "../ui/Button";
+import { Button } from "../ui/button";
 import { Input } from "../ui/Input";
 
 export const Header: React.FC = () => {
