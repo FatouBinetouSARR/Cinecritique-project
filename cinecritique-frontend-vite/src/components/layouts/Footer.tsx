@@ -16,28 +16,28 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Discover, review and rate movies with our passionate community of film enthusiasts. 
-              Share your thoughts and find your next favorite film.
+              Découvrez, critiquez et notez des films avec notre communauté passionnée de cinéphiles. 
+              Partagez vos avis et trouvez votre prochain film préféré.
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold text-foreground mb-4">Explore</h3>
+            <h3 className="font-semibold text-foreground mb-4">Explorer</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
-                  Popular Movies
+                  Films Populaires
                 </Link>
               </li>
               <li>
                 <Link to="/top-rated" className="text-muted-foreground hover:text-primary transition-colors">
-                  Top Rated
+                   Les Mieux Notés
                 </Link>
               </li>
               <li>
                 <Link to="/search" className="text-muted-foreground hover:text-primary transition-colors">
-                  Search Movies
+                  Rechercher un Film
                 </Link>
               </li>
             </ul>
@@ -45,21 +45,21 @@ export function Footer() {
 
           {/* Account */}
           <div>
-            <h3 className="font-semibold text-foreground mb-4">Account</h3>
+            <h3 className="font-semibold text-foreground mb-4">Compte</h3>
             <ul className="space-y-2 text-sm">
               <li>
                 <Link to="/login" className="text-muted-foreground hover:text-primary transition-colors">
-                  Sign In
+                  Se Connecter
                 </Link>
               </li>
               <li>
                 <Link to="/register" className="text-muted-foreground hover:text-primary transition-colors">
-                  Sign Up
+                  S’inscrire
                 </Link>
               </li>
               <li>
                 <Link to="/my-reviews" className="text-muted-foreground hover:text-primary transition-colors">
-                  My Reviews
+                  Mes Critiques
                 </Link>
               </li>
             </ul>
@@ -68,7 +68,7 @@ export function Footer() {
 
         <div className="border-t border-border mt-8 pt-6 text-center">
           <p className="text-muted-foreground text-sm">
-            © 2024 CineCritique. Built with passion for cinema.
+            © 2024 CineCritique. Construit avec passion pour le cinéma.
           </p>
         </div>
       </div>

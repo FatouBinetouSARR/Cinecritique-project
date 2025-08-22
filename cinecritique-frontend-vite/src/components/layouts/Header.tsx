@@ -27,13 +27,13 @@ export const Header: React.FC = () => {
             </span>
           </Link>
 
-          {/* Search Bar */}
+          {/* Barre de recherche */}
           <form onSubmit={handleSearch} className="flex-1 max-w-md mx-8">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 type="search"
-                placeholder="Search movies..."
+                placeholder="Rechercher un film..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-input border-border text-foreground placeholder:text-muted-foreground"
@@ -44,21 +44,21 @@ export const Header: React.FC = () => {
           {/* Navigation */}
           <nav className="flex items-center space-x-6">
             <Link to="/" className="text-foreground hover:text-primary transition-colors">
-              Home
+              Accueil
             </Link>
             <Link to="/top-rated" className="text-foreground hover:text-primary transition-colors">
-              Top Rated
+              Les mieux notés
             </Link>
             <Link to="/my-reviews" className="text-foreground hover:text-primary transition-colors">
-              My Reviews
+              Mes critiques
             </Link>
             <Button variant="ghost" size="sm" className="text-foreground hover:text-primary">
               <User className="h-4 w-4 mr-2" />
-              Profile
+              Profil
             </Button>
             <Link to="/login">
               <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                Sign In
+                Se connecter
               </Button>
             </Link>
           </nav>
