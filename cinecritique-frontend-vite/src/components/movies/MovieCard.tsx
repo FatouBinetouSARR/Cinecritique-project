@@ -53,7 +53,7 @@ export const MovieCard: React.FC<MovieCardProps> = ({
         <div className="space-y-3">
           <div>
             <Link to={`/movie/${id}`}>
-              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-2 font-space-grotesk">
+              <h3 className="font-semibold text-foreground group-hover:text-secondary transition-colors line-clamp-2 font-space-grotesk">
                 {title}
               </h3>
             </Link>
