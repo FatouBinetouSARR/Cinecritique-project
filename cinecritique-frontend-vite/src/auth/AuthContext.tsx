@@ -1,4 +1,11 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 type User = { id: number; email: string } | null;
 
@@ -9,7 +16,10 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  fetchWithAuth: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+  fetchWithAuth: (
+    input: RequestInfo | URL,
+    init?: RequestInit
+  ) => Promise<Response>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -25,7 +35,9 @@ async function apiFetch(path: string, options: RequestInit = {}) {
   });
 }
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const refreshInProgressRef = useRef<Promise<string | null> | null>(null);
@@ -52,7 +64,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const res = await apiFetch("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
+    const res = await apiFetch("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
     if (!res.ok) throw new Error("Login failed");
     const data = await res.json();
     setUser(data.user);
@@ -60,7 +75,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const register = useCallback(async (email: string, password: string) => {
-    const res = await apiFetch("/api/auth/register", { method: "POST", body: JSON.stringify({ email, password }) });
+    const res = await apiFetch("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
     if (!res.ok) throw new Error("Register failed");
     const data = await res.json();
     setUser(data.user);
@@ -79,7 +97,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const doRequest = async (token?: string | null) => {
         const headers = new Headers(init.headers || {});
         if (token) headers.set("Authorization", `Bearer ${token}`);
-        const res = await fetch(input, { ...init, headers, credentials: "include" });
+        const res = await fetch(input, {
+          ...init,
+          headers,
+          credentials: "include",
+        });
         return res;
       };
 
@@ -96,22 +118,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 
   useEffect(() => {
-    // Optionally, try to get a token at mount using refresh cookie
     performRefresh();
   }, [performRefresh]);
 
   const value = useMemo(
-    () => ({ user, accessToken, isAuthenticated, login, register, logout, fetchWithAuth }),
+    () => ({
+      user,
+      accessToken,
+      isAuthenticated,
+      login,
+      register,
+      logout,
+      fetchWithAuth,
+    }),
     [user, accessToken, isAuthenticated, login, register, logout, fetchWithAuth]
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  );
 };
 
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
-}
-
-
+export { AuthContext };
