@@ -7,7 +7,7 @@ const popularMovies = [
   {
     id: 1,
     title: "Oppenheimer",
-    posterPath: "/oppenheimer-inspired-poster.png",
+    posterPath: "/oppenheimer-backdrop.jpg",
     releaseDate: "2023-07-21",
     runtime: 180,
     genres: ["Drama", "History", "Biography"],
@@ -18,7 +18,7 @@ const popularMovies = [
   {
     id: 2,
     title: "Barbie",
-    posterPath: "/barbie-inspired-poster.png",
+    posterPath: "/multiverse-movie-poster.jpg",
     releaseDate: "2023-07-21",
     runtime: 114,
     genres: ["Comedy", "Fantasy", "Adventure"],
@@ -30,7 +30,7 @@ const popularMovies = [
   {
     id: 3,
     title: "Dune: Part Two",
-    posterPath: "/dune-part-two-inspired-desert.png",
+    posterPath: "/dune-part-two-inspired-desert.jpg",
     releaseDate: "2024-03-01",
     runtime: 166,
     genres: ["Sci-Fi", "Adventure", "Drama"],
@@ -42,7 +42,7 @@ const popularMovies = [
   {
     id: 4,
     title: "Spider-Man: Across the Spider-Verse",
-    posterPath: "/placeholder-74yfu.png",
+    posterPath: "/Spider-Man Across the Spider-Verse.jpg",
     releaseDate: "2023-06-02",
     runtime: 140,
     genres: ["Animation", "Action", "Adventure"],
@@ -54,7 +54,7 @@ const popularMovies = [
   {
     id: 5,
     title: "The Batman",
-    posterPath: "/dark-knight-poster.png",
+    posterPath: "/The Batman.jpg",
     releaseDate: "2022-03-04",
     runtime: 176,
     genres: ["Action", "Crime", "Drama"],
@@ -66,7 +66,7 @@ const popularMovies = [
   {
     id: 6,
     title: "Top Gun: Maverick",
-    posterPath: "/placeholder-dhgq8.png",
+    posterPath: "/Top Gun Maverick.jpg",
     releaseDate: "2022-05-27",
     runtime: 131,
     genres: ["Action", "Drama"],
@@ -74,6 +74,78 @@ const popularMovies = [
     reviewCount: 3156,
     overview:
       "After thirty years, Maverick is still pushing the envelope as a top naval aviator, but must confront ghosts of his past.",
+  },
+   {
+    id: 7,
+    title: "Avatar: The Way of Water",
+    posterPath: "/Avatar The Way of Water.jpg",
+    releaseDate: "2022-12-16",
+    runtime: 192,
+    genres: ["Action", "Adventure", "Fantasy"],
+    rating: 4.5,
+    reviewCount: 2100,
+    overview:
+      "Jake Sully and Neytiri work to protect their family and the planet of Pandora from a new threat.",
+  },
+  {
+    id: 8,
+    title: "Guardians of the Galaxy Vol. 3",
+    posterPath: "/Guardians of the Galaxy Vol. 3.jpg",
+    releaseDate: "2023-05-05",
+    runtime: 150,
+    genres: ["Action", "Comedy", "Sci-Fi"],
+    rating: 4.6,
+    reviewCount: 1870,
+    overview:
+      "The Guardians face new challenges as they unravel mysteries of Peter Quill’s past and battle cosmic threats.",
+  },
+  {
+    id: 9,
+    title: "Mission: Impossible – Dead Reckoning Part One",
+    posterPath: "/Mission Impossible – Dead Reckoning Part One.jpg",
+    releaseDate: "2023-07-12",
+    runtime: 163,
+    genres: ["Action", "Adventure", "Thriller"],
+    rating: 4.4,
+    reviewCount: 1400,
+    overview:
+      "Ethan Hunt and his team face the deadliest mission yet as they attempt to stop a global catastrophe.",
+  },
+  {
+    id: 10,
+    title: "Black Panther: Wakanda Forever",
+    posterPath: "/Black Panther Wakanda Forever.jpg",
+    releaseDate: "2022-11-11",
+    runtime: 161,
+    genres: ["Action", "Adventure", "Drama"],
+    rating: 4.3,
+    reviewCount: 2250,
+    overview:
+      "The leaders of Wakanda fight to protect their nation following the death of King T’Challa.",
+  },
+  {
+    id: 11,
+    title: "The Flash",
+    posterPath: "The Flash.jpg",
+    releaseDate: "2023-06-16",
+    runtime: 144,
+    genres: ["Action", "Adventure", "Sci-Fi"],
+    rating: 4.1,
+    reviewCount: 900,
+    overview:
+      "Barry Allen uses his super speed to change the past, but his actions have unintended consequences on the multiverse.",
+  },
+  {
+    id: 12,
+    title: "Indiana Jones and the Dial of Destiny",
+    posterPath: "/Indiana Jones and the Dial of Destiny.jpg",
+    releaseDate: "2023-06-30",
+    runtime: 154,
+    genres: ["Action", "Adventure"],
+    rating: 4.2,
+    reviewCount: 1100,
+    overview:
+      "Indiana Jones races against time and enemies to secure a powerful ancient artifact before it falls into the wrong hands.",
   },
 ]
 
