@@ -75,7 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchWithAuth = useCallback(
     async (input: RequestInfo | URL, init: RequestInit = {}) => {
-      let tokenToUse = accessToken;
+      const tokenToUse = accessToken;
       const doRequest = async (token?: string | null) => {
         const headers = new Headers(init.headers || {});
         if (token) headers.set("Authorization", `Bearer ${token}`);

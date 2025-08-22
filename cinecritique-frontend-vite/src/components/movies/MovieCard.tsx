@@ -1,8 +1,8 @@
 import React from "react";
 import { Calendar, Clock } from "lucide-react";
-import { Card, CardContent } from "./../ui/card";
-import { Badge } from "./../ui/badge";
-import { StarRating } from "./../ui/StarRating";
+import { Card, CardContent } from "../../ui/card";
+import { Badge } from "../../ui/badge";
+import { StarRating } from "../../ui/StarRating";
 import { Link } from "react-router-dom";
 
 interface MovieCardProps {

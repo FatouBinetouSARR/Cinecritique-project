@@ -85,8 +85,8 @@ export default function Login() {
     <div className="min-h-screen flex flex-col justify-center items-center bg-background px-4">
       <div className="w-full max-w-md">
         {/* Logo et titre */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground">CineCritique</h1>
+        <div className="text-center mb-4 p-2">
+          <h1 className="text-3xl font-bold text-foreground p-2">CineCritique</h1>
           <p className="text-muted-foreground">Connectez-vous pour découvrir et critiquer des films</p>
         </div>
 

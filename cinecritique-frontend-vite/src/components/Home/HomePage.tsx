@@ -1,6 +1,6 @@
 import React from "react";
 import { MovieCard } from "../movies/MovieCard";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import { TrendingUp, Star, Users } from "lucide-react";
 
 const popularMovies = [
@@ -173,21 +173,25 @@ const featuredStats = [
 
 export const HomePage: React.FC = () => {
   return (
-    <>
+    <div className="bg-black min-h-screen text-white">
       {/* Section Héros */}
-      <section className="relative bg-gradient-to-b from-card to-background py-16 md:py-24 text-center space-y-8">
-        <h1 className="text-4xl md:text-6xl font-bold text-foreground font-space-grotesk">
+      <section className="relative bg-gradient-to-b from-black/100 to-black/90 py-16 md:py-24 text-center space-y-8">
+        <h1 className="text-4xl md:text-6xl font-bold text-white font-space-grotesk">
           Découvrez votre prochain <span className="text-primary block">film préféré</span>
         </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+        <p className="text-xl text-white/70 max-w-2xl mx-auto leading-relaxed">
           Rejoignez des milliers de passionnés de cinéma partageant leurs avis, découvrant des perles rares et notant les films qui comptent.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button size="lg" className="bg-primary text-white hover:bg-primary/90">
             Commencer à critiquer
           </Button>
-          <Button size="lg" variant="ghost" className="border-border text-foreground hover:bg-muted bg-transparent">
+          <Button
+            size="lg"
+            variant="ghost"
+            className="text-white border border-primary hover:bg-primary/20"
+          >
             Parcourir les films
           </Button>
         </div>
@@ -196,25 +200,29 @@ export const HomePage: React.FC = () => {
           {featuredStats.map((stat, index) => (
             <div key={index} className="text-center space-y-2">
               <div className="flex justify-center">
-                <stat.icon className="h-8 w-8 text-secondary" />
+                <stat.icon className="h-8 w-8 text-primary" />
               </div>
-              <p className="text-2xl font-bold text-foreground font-space-grotesk">{stat.value}</p>
-              <p className="text-sm font-medium text-foreground">{stat.label}</p>
-              <p className="text-xs text-muted-foreground">{stat.description}</p>
+              <p className="text-2xl font-bold text-white font-space-grotesk">{stat.value}</p>
+              <p className="text-sm font-medium text-white">{stat.label}</p>
+              <p className="text-xs text-white/70">{stat.description}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Films Populaires */}
-      <section className="py-16 bg-background">
-        <div className="flex items-center justify-between mb-8">
+      <section className="py-16 bg-black/90">
+        <div className="flex items-center justify-between mb-8 px-4 md:px-0">
           <div className="space-y-2">
-            <h2 className="text-3xl font-bold text-foreground font-space-grotesk">Films populaires</h2>
-            <p className="text-muted-foreground">Les films tendance appréciés par notre communauté</p>
+            <h2 className="text-3xl font-bold text-white font-space-grotesk">
+              Films populaires
+            </h2>
+            <p className="text-white/70">
+              Les films tendance appréciés par notre communauté
+            </p>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 px-4 md:px-0">
           {popularMovies.map((movie) => (
             <MovieCard key={movie.id} {...movie} />
           ))}
@@ -222,29 +230,31 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* Appel à l’action */}
-      <section className="py-16 bg-card">
+      <section className="py-16 bg-black/80">
         <div className="container mx-auto px-4 text-center space-y-8">
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold text-foreground font-space-grotesk">Prêt à partager votre avis ?</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <h2 className="text-3xl font-bold text-white font-space-grotesk">
+              Prêt à partager votre avis ?
+            </h2>
+            <p className="text-white/70 max-w-2xl mx-auto leading-relaxed">
               Rejoignez notre communauté de passionnés du cinéma. Notez des films, écrivez des critiques et découvrez votre prochain film préféré à travers les yeux d’autres cinéphiles.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button size="lg" className="bg-primary text-white hover:bg-primary/90">
               Rejoindre CineCritique
             </Button>
             <Button
               size="lg"
               variant="ghost"
-              className="border-border text-foreground hover:bg-muted bg-transparent"
+              className="text-white border border-primary hover:bg-primary/20"
             >
               En savoir plus
             </Button>
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 };

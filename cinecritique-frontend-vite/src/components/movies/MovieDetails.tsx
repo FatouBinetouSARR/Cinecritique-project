@@ -1,7 +1,7 @@
 import { Calendar, Clock, DollarSign, Globe, Building } from "lucide-react"
-import { Card, CardContent } from "../ui/card" // adapter selon ton dossier
-import { Badge } from "../ui/badge"
-import { StarRating } from "../ui/StarRating"
+import { Card, CardContent } from "../../ui/card" // adapter selon ton dossier
+import { Badge } from "../../ui/badge"
+import { StarRating } from "../../ui/StarRating"
 
 interface Cast {
   name: string

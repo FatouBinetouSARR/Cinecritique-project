@@ -1,4 +1,3 @@
-// src/components/Footer.tsx
 import { Link } from "react-router-dom"
 import { Star } from "lucide-react"
 
@@ -10,7 +9,7 @@ export function Footer() {
           {/* Logo & Description */}
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center space-x-2 mb-4">
-              <Star className="h-6 w-6 text-secondary fill-current" />
+              <Star className="h-6 w-6 text-primary fill-current" />
               <span className="text-xl font-bold font-space-grotesk text-foreground">
                 CineCritique
               </span>

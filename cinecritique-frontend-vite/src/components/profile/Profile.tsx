@@ -42,7 +42,7 @@ export default function Profile() {
         } else {
           setError("Impossible de charger le profil");
         }
-      } catch (err) {
+      } catch {
         setError("Erreur de connexion au serveur");
       } finally {
         setLoading(false);
