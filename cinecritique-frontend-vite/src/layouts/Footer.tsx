@@ -9,7 +9,7 @@ export function Footer() {
           {/* Logo & Description */}
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center space-x-2 mb-4">
-              <Star className="h-6 w-6 text-primary fill-current" />
+              <Star className="h-6 w-6 text-secondary fill-current" />
               <span className="text-xl font-bold font-space-grotesk text-foreground">
                 CineCritique
               </span>
@@ -25,17 +25,17 @@ export function Footer() {
             <h3 className="font-semibold text-foreground mb-4">Explorer</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/" className="text-muted-foreground hover:text-secondary transition-colors">
                   Films Populaires
                 </Link>
               </li>
               <li>
-                <Link to="/top-rated" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/top-rated" className="text-muted-foreground hover:text-secondary transition-colors">
                    Les Mieux Notés
                 </Link>
               </li>
               <li>
-                <Link to="/search" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/search" className="text-muted-foreground hover:text-secondary transition-colors">
                   Rechercher un Film
                 </Link>
               </li>
@@ -47,17 +47,17 @@ export function Footer() {
             <h3 className="font-semibold text-foreground mb-4">Compte</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/login" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/login" className="text-muted-foreground hover:text-secondary transition-colors">
                   Se Connecter
                 </Link>
               </li>
               <li>
-                <Link to="/register" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/register" className="text-muted-foreground hover:text-secondary transition-colors">
                   S’inscrire
                 </Link>
               </li>
               <li>
-                <Link to="/my-reviews" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/my-reviews" className="text-muted-foreground hover:text-secondary transition-colors">
                   Mes Critiques
                 </Link>
               </li>

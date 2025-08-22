@@ -23,9 +23,9 @@ export const Button: React.FC<ButtonProps> = ({
   const baseStyles = clsx(
     "rounded-md font-medium transition-colors focus:outline-none flex items-center justify-center",
     variant === "default" &&
-      "bg-primary text-white hover:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed",
+      "bg-secondary text-white hover:bg-secondary/80 disabled:opacity-50 disabled:cursor-not-allowed",
     variant === "ghost" &&
-      "bg-transparent text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed",
+      "bg-transparent text-secondary hover:text-secondary/80 disabled:opacity-50 disabled:cursor-not-allowed",
     size === "sm" && "px-2 py-1 text-sm",
     size === "md" && "px-4 py-2 text-md",
     size === "lg" && "px-6 py-3 text-lg",

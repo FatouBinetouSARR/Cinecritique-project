@@ -38,15 +38,15 @@ export const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-primary bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
+    <header className="sticky top-0 z-50 w-full border-b border-secondary bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Film className="h-6 w-6 text-primary" />
+          <div className="p-2 rounded-lg bg-secondary/10">
+            <Film className="h-6 w-6 text-secondary" />
           </div>
           <span className="text-xl font-bold font-space-grotesk">
-            Cine<span className="text-primary">Critique</span>
+            Cine<span className="text-secondary">Critique</span>
           </span>
         </Link>
 
@@ -55,7 +55,7 @@ export const Header: React.FC = () => {
           <Link
             to="/"
             className={`text-sm font-medium transition-colors ${
-              isActive("/") ? "text-primary font-bold" : "text-white hover:text-primary"
+              isActive("/") ? "text-secondary font-bold" : "text-white hover:text-secondary"
             }`}
           >
             Accueil
@@ -63,7 +63,7 @@ export const Header: React.FC = () => {
           <Link
             to="/movies"
             className={`text-sm font-medium transition-colors flex items-center gap-1 ${
-              isActive("/movies") ? "text-primary font-bold" : "text-white hover:text-primary"
+              isActive("/movies") ? "text-secondary font-bold" : "text-white hover:text-secondary"
             }`}
           >
             <Film className="h-4 w-4" />
@@ -72,7 +72,7 @@ export const Header: React.FC = () => {
           <Link
             to="/top-rated"
             className={`text-sm font-medium transition-colors ${
-              isActive("/top-rated") ? "text-primary font-bold" : "text-white hover:text-primary"
+              isActive("/top-rated") ? "text-secondary font-bold" : "text-white hover:text-secondary"
             }`}
           >
             Les mieux notés
@@ -81,7 +81,7 @@ export const Header: React.FC = () => {
             <Link
               to="/my-reviews"
               className={`text-sm font-medium transition-colors ${
-                isActive("/my-reviews") ? "text-primary font-bold" : "text-white hover:text-primary"
+                isActive("/my-reviews") ? "text-secondary font-bold" : "text-white hover:text-secondary"
               }`}
             >
               Mes critiques
@@ -98,7 +98,7 @@ export const Header: React.FC = () => {
               placeholder="Rechercher un film..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border-primary text-white placeholder:text-white/50 bg-black"
+              className="pl-10 border-secondary text-white placeholder:text-white/50 bg-black"
             />
           </div>
         </form>

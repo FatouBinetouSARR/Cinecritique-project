@@ -102,7 +102,7 @@ export default function Login() {
                   type="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${errors.email ? "border-red-500" : "border-border"} bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
+                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${errors.email ? "border-red-500" : "border-border"} bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-secondary focus:outline-none`}
                   placeholder="votre@email.com"
                   required
                 />
@@ -120,7 +120,7 @@ export default function Login() {
                   type="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${errors.password ? "border-red-500" : "border-border"} bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:outline-none`}
+                  className={`w-full pl-10 pr-3 py-2 mt-1 rounded-lg border ${errors.password ? "border-red-500" : "border-border"} bg-input text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-secondary focus:outline-none`}
                   placeholder="Votre mot de passe"
                   required
                 />
@@ -131,7 +131,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center items-center gap-2 py-2 px-4 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+              className="w-full flex justify-center items-center gap-2 py-2 px-4 rounded-lg bg-secondary text-secondary-foreground font-medium hover:bg-secondary/90 focus:ring-2 focus:ring-offset-2 focus:ring-secondary disabled:opacity-50"
             >
               {loading ? <Loader2 className="animate-spin h-5 w-5" /> : "Se connecter"}
             </button>
@@ -140,7 +140,7 @@ export default function Login() {
           {/* Lien inscription */}
           <div className="mt-6 text-center text-sm text-muted-foreground">
             Pas encore inscrit ?{" "}
-            <Link to="/register" className="text-primary hover:underline">
+            <Link to="/register" className="text-secondary hover:underline">
               Créez un compte
             </Link>
           </div>

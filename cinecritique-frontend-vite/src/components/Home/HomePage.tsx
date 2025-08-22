@@ -177,20 +177,20 @@ export const HomePage: React.FC = () => {
       {/* Section Héros */}
       <section className="relative bg-gradient-to-b from-black/100 to-black/90 py-16 md:py-24 text-center space-y-8">
         <h1 className="text-4xl md:text-6xl font-bold text-white font-space-grotesk">
-          Découvrez votre prochain <span className="text-primary block">film préféré</span>
+          Découvrez votre prochain <span className="text-secondary block">film préféré</span>
         </h1>
         <p className="text-xl text-white/70 max-w-2xl mx-auto leading-relaxed">
           Rejoignez des milliers de passionnés de cinéma partageant leurs avis, découvrant des perles rares et notant les films qui comptent.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="bg-primary text-white hover:bg-primary/90">
+          <Button size="lg" className="bg-secondary text-white hover:bg-secondary/90">
             Commencer à critiquer
           </Button>
           <Button
             size="lg"
             variant="ghost"
-            className="text-white border border-primary hover:bg-primary/20"
+            className="text-white border border-secondary hover:bg-secondary/20"
           >
             Parcourir les films
           </Button>
@@ -200,7 +200,7 @@ export const HomePage: React.FC = () => {
           {featuredStats.map((stat, index) => (
             <div key={index} className="text-center space-y-2">
               <div className="flex justify-center">
-                <stat.icon className="h-8 w-8 text-primary" />
+                <stat.icon className="h-8 w-8 text-secondary" />
               </div>
               <p className="text-2xl font-bold text-white font-space-grotesk">{stat.value}</p>
               <p className="text-sm font-medium text-white">{stat.label}</p>
@@ -242,13 +242,13 @@ export const HomePage: React.FC = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-primary text-white hover:bg-primary/90">
+            <Button size="lg" className="bg-secondary text-white hover:bg-secondary/90">
               Rejoindre CineCritique
             </Button>
             <Button
               size="lg"
               variant="ghost"
-              className="text-white border border-primary hover:bg-primary/20"
+              className="text-white border border-secondary hover:bg-secondary/20"
             >
               En savoir plus
             </Button>
