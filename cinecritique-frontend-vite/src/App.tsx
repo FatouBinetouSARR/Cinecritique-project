@@ -7,15 +7,23 @@ import Profile from "./components/profile/Profile";
 import { PrivateRoute } from "./auth/PrivateRoute";
 import { Toaster } from "react-hot-toast";
 
+import { TopRatedPage } from "./components/top-rated/TopRatedPage"; 
+import { MyReviewsPage } from "./components/reviews/MyReviewsPage";
+
 const App: React.FC = () => {
   return (
     <>
+      <Toaster position="top-right" reverseOrder={false} /> 
       <Layout>
-        <Toaster position="top-right" reverseOrder={false} /> 
         <Routes>
+          {/* Accueil */}
           <Route path="/" element={<HomePage />} />
+
+          {/* Auth */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          {/* Profil (protégé) */}
           <Route
             path="/profile"
             element={
@@ -23,6 +31,22 @@ const App: React.FC = () => {
                 <Profile />
               </PrivateRoute>
             }
+          />
+
+          {/* 🎬 Liste des films les mieux notés */}
+          <Route path="/top-rated" element={<TopRatedPage />} />
+
+          {/* Mes critiques */}
+          <Route path="/my-reviews" element={
+            // <PrivateRoute>
+              <MyReviewsPage/>
+            // </PrivateRoute>
+          } />
+
+          {/* Page 404 */}
+          <Route
+            path="*"
+            element={<div className="text-center p-10">Page non trouvée 😢</div>}
           />
         </Routes>
       </Layout>

@@ -1,7 +1,7 @@
 import React from "react";
-import { HeroSection } from "./HeroSection";
-import { PopularMovies } from "./PopularMovies";
-import { ReviewsTabs } from "./ReviewsTabs";
+import { HeroSection } from "./SectionHero";
+import { PopularMovies } from "./SectionPopularMovies";
+import { ReviewsTabs } from "./SectionReviewsTabs";
 
 export const HomePage: React.FC = () => {
   return (

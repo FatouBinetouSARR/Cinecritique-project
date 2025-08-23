@@ -1,4 +1,4 @@
-export const popularMovies = [
+export const dataMovies = [
   {
     id: 1,
     title: "Oppenheimer",

@@ -1,9 +1,9 @@
 import React from "react";
 import { MovieCard } from "../movies/MovieCard";
-import { popularMovies } from "../../data/movies";
+import { dataMovies } from "../../data/dataMovies";
 
 export const PopularMovies: React.FC = () => {
-  const movieList = [...popularMovies, ...popularMovies];
+  const movieList = [...dataMovies, ...dataMovies];
 
   return (
     <section className="py-12 px-4 md:px-8 relative">
