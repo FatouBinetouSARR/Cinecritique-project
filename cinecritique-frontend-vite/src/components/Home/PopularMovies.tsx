@@ -1,9 +1,10 @@
+// src/components/home/PopularMovies.tsx
 import React from "react";
 import { MovieCard } from "../movies/MovieCard";
 import { dataMovies } from "../../data/dataMovies";
 
 export const PopularMovies: React.FC = () => {
-  const movieList = [...dataMovies, ...dataMovies];
+  const movieIds = dataMovies.map((m) => m.id);
 
   return (
     <section className="py-12 px-4 md:px-8 relative">
@@ -19,18 +20,17 @@ export const PopularMovies: React.FC = () => {
       {/* Conteneur défilement horizontal */}
       <div className="overflow-hidden relative">
         <div className="flex animate-scroll gap-2 md:gap-4">
-          {movieList.map((movie, index) => (
+          {movieIds.map((id) => (
             <div
-              key={index}
+              key={id}
               className="flex-shrink-0 w-[40%] sm:w-[35%] md:w-[25%] lg:w-[15%]"
             >
-              <MovieCard {...movie} />
+              <MovieCard movieId={id} />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Styles pour l'animation */}
       <style>
         {`
           @keyframes scroll {

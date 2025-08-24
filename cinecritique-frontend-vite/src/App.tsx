@@ -4,16 +4,17 @@ import { Layout } from "./layouts/Layout";
 import Login from "./components/login-register/Login";
 import Register from "./components/login-register/Register";
 import Profile from "./components/profile/Profile";
-import { PrivateRoute } from "./auth/PrivateRoute";
+// import { PrivateRoute } from "./auth/PrivateRoute";
 import { Toaster } from "react-hot-toast";
 
-import { TopRatedPage } from "./components/top-rated/TopRatedPage"; 
-import { MyReviewsPage } from "./components/reviews/MyReviewsPage";
+import { TopRatedPage } from "./components/top-rated/TopRatedPage";
+import { ReviewsPage } from "./components/reviews/ReviewsPage";
+import { CriticsPage } from "./components/critiques/CriticsPage";
 
 const App: React.FC = () => {
   return (
     <>
-      <Toaster position="top-right" reverseOrder={false} /> 
+      <Toaster position="top-right" reverseOrder={false} />
       <Layout>
         <Routes>
           {/* Accueil */}
@@ -27,9 +28,9 @@ const App: React.FC = () => {
           <Route
             path="/profile"
             element={
-              <PrivateRoute>
+              // <PrivateRoute>
                 <Profile />
-              </PrivateRoute>
+              // </PrivateRoute>
             }
           />
 
@@ -39,9 +40,14 @@ const App: React.FC = () => {
           {/* Mes critiques */}
           <Route path="/my-reviews" element={
             // <PrivateRoute>
-              <MyReviewsPage/>
+            <ReviewsPage />
             // </PrivateRoute>
           } />
+
+          {/* Toutes les critiques */}
+          <Route path="/reviews" element={<ReviewsPage />} />
+          <Route path="/critics" element={<CriticsPage />} />
+
 
           {/* Page 404 */}
           <Route

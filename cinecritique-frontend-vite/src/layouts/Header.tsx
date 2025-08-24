@@ -40,10 +40,10 @@ export const Header: React.FC = () => {
   };
 
   const links = [
-    { label: "Accueil", path: "/" },
-    { label: "Films", path: "/movies", icon: <Film className="h-4 w-4" /> },
-    { label: "Les mieux notés", path: "/top-rated"},
-    { label: "Mes critiques", path: "/my-reviews", icon: <User className="h-4 w-4" /> },
+    { label: "Films", path: "/top-rated", icon: <Film className="h-4 w-4" /> },
+    { label: "Membres", path: "/critics" },
+    { label: "Mes avis", path: "/my-reviews"},
+    { label: "Profile", path: "/profile", icon: <User className="h-4 w-4" /> },
     ...(isAuthenticated ? [{ label: "", path: "" }] : []),
   ];
 

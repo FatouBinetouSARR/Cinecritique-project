@@ -1,3 +1,4 @@
+// src/components/home/Hero.tsx
 import React from "react";
 import { Button } from "../../ui/button";
 

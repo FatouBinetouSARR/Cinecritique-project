@@ -1,3 +1,4 @@
+// src/data/dataMovies.ts
 export const dataMovies = [
   {
     id: 1,

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom"
 import { Button } from "../../ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card"
 import { Badge } from "../../ui/badge"
-import { DataUserReview, type UserReview } from "../../data/dataUserReviews"
+import { DataUserReview, type UserReview } from "../../data/dataReviews"
 
 export const MovieReviews: React.FC = () => {
   const [reviews, setReviews] = useState<UserReview[]>(DataUserReview)
