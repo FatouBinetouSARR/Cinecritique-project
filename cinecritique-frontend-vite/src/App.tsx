@@ -7,9 +7,9 @@ import Profile from "./components/profile/Profile";
 // import { PrivateRoute } from "./auth/PrivateRoute";
 import { Toaster } from "react-hot-toast";
 
-import { TopRatedPage } from "./components/top-rated/TopRatedPage";
+import { MoviesPage } from "./components/top-rated/MoviesPage";
 import { ReviewsPage } from "./components/reviews/ReviewsPage";
-import { CriticsPage } from "./components/critiques/CriticsPage";
+import { CriticsPage } from "./components/membres/MembrePage";
 
 const App: React.FC = () => {
   return (
@@ -35,7 +35,7 @@ const App: React.FC = () => {
           />
 
           {/* 🎬 Liste des films les mieux notés */}
-          <Route path="/top-rated" element={<TopRatedPage />} />
+          <Route path="/top-rated" element={<MoviesPage />} />
 
           {/* Mes critiques */}
           <Route path="/my-reviews" element={
