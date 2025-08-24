@@ -1,8 +1,8 @@
 // src/pages/MoviePage.tsx
 import React from "react";
 import { useParams, Navigate } from "react-router-dom";
-import { MovieDetails } from "../movies/MovieDetails";
-import { MovieReviews } from "../movies/MovieReviews";
+// import { MovieDetails } from "../movies/MovieDetails";
+// import { MovieReviews } from "../movies/MovieReviews";
 
 // --- Mock movie data ---
 const mockMovieDetails = {
@@ -61,49 +61,49 @@ const mockMovieDetails = {
 };
 
 // --- Mock reviews data ---
-const mockReviews = {
-  1: [
-    {
-      id: 1,
-      userId: "user1",
-      username: "CinemaLover92",
-      rating: 5,
-      title: "A Masterpiece of Cinema",
-      content:
-        "Christopher Nolan has outdone himself with this biographical thriller...",
-      createdAt: "2023-08-15T10:30:00Z",
-      helpful: 45,
-    },
-    {
-      id: 2,
-      userId: "user2",
-      username: "HistoryBuff",
-      rating: 4,
-      title: "Historically Fascinating",
-      content: "As someone deeply interested in WWII history...",
-      createdAt: "2023-08-10T14:22:00Z",
-      helpful: 32,
-    },
-  ],
-  2: [
-    {
-      id: 4,
-      userId: "user4",
-      username: "PinkFan",
-      rating: 5,
-      title: "Pure Joy and Fun!",
-      content: "This movie exceeded all my expectations! Margot Robbie...",
-      createdAt: "2023-08-12T16:45:00Z",
-      helpful: 67,
-    },
-  ],
-};
+// const mockReviews = {
+//   1: [
+//     {
+//       id: 1,
+//       userId: "user1",
+//       username: "CinemaLover92",
+//       rating: 5,
+//       title: "A Masterpiece of Cinema",
+//       content:
+//         "Christopher Nolan has outdone himself with this biographical thriller...",
+//       createdAt: "2023-08-15T10:30:00Z",
+//       helpful: 45,
+//     },
+//     {
+//       id: 2,
+//       userId: "user2",
+//       username: "HistoryBuff",
+//       rating: 4,
+//       title: "Historically Fascinating",
+//       content: "As someone deeply interested in WWII history...",
+//       createdAt: "2023-08-10T14:22:00Z",
+//       helpful: 32,
+//     },
+//   ],
+//   2: [
+//     {
+//       id: 4,
+//       userId: "user4",
+//       username: "PinkFan",
+//       rating: 5,
+//       title: "Pure Joy and Fun!",
+//       content: "This movie exceeded all my expectations! Margot Robbie...",
+//       createdAt: "2023-08-12T16:45:00Z",
+//       helpful: 67,
+//     },
+//   ],
+// };
 
 export const MoviePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const movieId = Number(id);
   const movie = mockMovieDetails[movieId as keyof typeof mockMovieDetails];
-  const reviews = mockReviews[movieId as keyof typeof mockReviews] || [];
+  // const reviews = mockReviews[movieId as keyof typeof mockReviews] || [];
 
   // équivalent de next/navigation -> notFound()
   if (!movie) {
@@ -113,8 +113,8 @@ export const MoviePage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <main className="flex-1">
-        <MovieDetails movie={movie} />
-        <MovieReviews movieId={movieId} reviews={reviews} />
+        {/* <MovieDetails movie={movie} />
+        <MovieReviews movieId={movieId} reviews={reviews} /> */}
       </main>
     </div>
   );
