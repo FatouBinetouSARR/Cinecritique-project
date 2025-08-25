@@ -1,39 +1,46 @@
 // src/pages/Account.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../../lib/useAuth";
-import { apiFetch } from "../../lib/apiFetch";
-import { API_URL } from "../../lib/apiFetch";
+import { apiFetch, API_URL } from "../../lib/apiFetch";
 
 interface ProfileData {
   id: number;
   email: string;
   username?: string;
   bio?: string;
-  adresse?: string;
-  age?: number;
   avatarUrl?: string;
+}
+
+interface Review {
+  id: number;
+  filmTitle: string;
+  content: string;
+  rating: number;
+  createdAt: string;
 }
 
 export default function Profile() {
   const { accessToken, logout } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingReviews, setLoadingReviews] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [formUsername, setFormUsername] = useState("");
   const [formBio, setFormBio] = useState("");
-  const [formAdresse, setFormAdresse] = useState("");
-  const [formAge, setFormAge] = useState<number | "">("");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const authHeader = useMemo(() => (
-    accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined
-  ), [accessToken]);
+  const authHeader = useMemo(
+    () => (accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),
+    [accessToken]
+  );
 
+  // Charger profil
   useEffect(() => {
     const fetchProfile = async () => {
       setError(null);
@@ -45,11 +52,8 @@ export default function Profile() {
         if (res.ok) {
           const data: ProfileData = await res.json();
           setProfile(data);
-          // Pré-remplir le formulaire
           setFormUsername(data.username || "");
           setFormBio(data.bio || "");
-          setFormAdresse(data.adresse || "");
-          setFormAge(typeof data.age === "number" ? data.age : "");
         } else if (res.status === 401) {
           await logout();
         } else {
@@ -61,9 +65,32 @@ export default function Profile() {
         setLoading(false);
       }
     };
-
     fetchProfile();
   }, [authHeader, logout]);
+
+  // Charger critiques
+  useEffect(() => {
+    const fetchReviews = async () => {
+      setLoadingReviews(true);
+      try {
+        const res = await apiFetch("/api/reviews/me", {
+          method: "GET",
+          headers: authHeader,
+        });
+        if (res.ok) {
+          const data: Review[] = await res.json();
+          setReviews(data);
+        }
+      } catch {
+        console.error("Erreur lors du chargement des critiques");
+      } finally {
+        setLoadingReviews(false);
+      }
+    };
+    if (accessToken) {
+      fetchReviews();
+    }
+  }, [authHeader, accessToken]);
 
   useEffect(() => {
     return () => {
@@ -82,8 +109,6 @@ export default function Profile() {
     if (!profile) return;
     setFormUsername(profile.username || "");
     setFormBio(profile.bio || "");
-    setFormAdresse(profile.adresse || "");
-    setFormAge(typeof profile.age === "number" ? profile.age : "");
     setAvatarFile(null);
     if (avatarPreview) URL.revokeObjectURL(avatarPreview);
     setAvatarPreview(null);
@@ -97,7 +122,6 @@ export default function Profile() {
     setError(null);
     setLoading(true);
     try {
-      // 1) Uploader l'avatar si sélectionné
       if (avatarFile) {
         const formData = new FormData();
         formData.append("avatar", avatarFile);
@@ -112,15 +136,12 @@ export default function Profile() {
         }
       }
 
-      // 2) Mettre à jour les infos du profil
       const res = await apiFetch("/api/profile", {
         method: "PUT",
         headers: { ...(authHeader || {}) },
         body: JSON.stringify({
           username: formUsername || undefined,
           bio: formBio || undefined,
-          adresse: formAdresse || undefined,
-          age: formAge === "" ? undefined : Number(formAge),
         }),
       });
       if (!res.ok) {
@@ -131,7 +152,6 @@ export default function Profile() {
         throw new Error("Échec de la mise à jour du profil");
       }
 
-      // 3) Rafraîchir les données
       const refreshed = await apiFetch("/api/profile", {
         method: "GET",
         headers: authHeader,
@@ -180,7 +200,8 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+        {/* Profil */}
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           {/* Header */}
           <div className="px-6 py-5 border-b border-gray-200 flex items-center justify-between">
@@ -191,7 +212,11 @@ export default function Profile() {
             <div className="flex items-center gap-2">
               {!isEditing && (
                 <button
-                  onClick={() => { setIsEditing(true); setSuccess(null); setError(null); }}
+                  onClick={() => {
+                    setIsEditing(true);
+                    setSuccess(null);
+                    setError(null);
+                  }}
                   className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
                 >
                   Modifier le profil
@@ -221,13 +246,9 @@ export default function Profile() {
                 <h4 className="text-lg font-semibold">{profile?.username || "Utilisateur"}</h4>
                 <p className="text-sm text-gray-600 mt-1">{profile?.bio || "Aucune bio"}</p>
                 <div className="text-sm text-gray-700 mt-4 w-full text-left space-y-2">
-                  <p><span className="font-medium">Email:</span> {profile?.email}</p>
-                  {profile?.age !== undefined && (
-                    <p><span className="font-medium">Âge:</span> {profile?.age}</p>
-                  )}
-                  {profile?.adresse && (
-                    <p><span className="font-medium">Adresse:</span> {profile?.adresse}</p>
-                  )}
+                  <p>
+                    <span className="font-medium">Email:</span> {profile?.email}
+                  </p>
                 </div>
               </div>
             </aside>
@@ -253,14 +274,6 @@ export default function Profile() {
                       <p className="text-xs uppercase text-gray-500">Bio</p>
                       <p className="text-gray-900 whitespace-pre-line">{profile?.bio || "—"}</p>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded">
-                      <p className="text-xs uppercase text-gray-500">Âge</p>
-                      <p className="text-gray-900">{profile?.age ?? "—"}</p>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded">
-                      <p className="text-xs uppercase text-gray-500">Adresse</p>
-                      <p className="text-gray-900">{profile?.adresse || "—"}</p>
-                    </div>
                   </div>
                 </div>
               ) : (
@@ -276,17 +289,6 @@ export default function Profile() {
                         placeholder="Votre pseudo"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Âge</label>
-                      <input
-                        type="number"
-                        value={formAge}
-                        onChange={(e) => setFormAge(e.target.value === "" ? "" : Number(e.target.value))}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        placeholder="Votre âge"
-                        min={0}
-                      />
-                    </div>
                     <div className="sm:col-span-2">
                       <label className="block text-sm font-medium text-gray-700">Bio</label>
                       <textarea
@@ -295,16 +297,6 @@ export default function Profile() {
                         rows={4}
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                         placeholder="Parlez de vous..."
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700">Adresse</label>
-                      <input
-                        type="text"
-                        value={formAdresse}
-                        onChange={(e) => setFormAdresse(e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        placeholder="Votre adresse"
                       />
                     </div>
                     <div className="sm:col-span-2">
@@ -335,7 +327,11 @@ export default function Profile() {
                           {avatarPreview && (
                             <button
                               type="button"
-                              onClick={() => { if (avatarPreview) URL.revokeObjectURL(avatarPreview); setAvatarPreview(null); setAvatarFile(null); }}
+                              onClick={() => {
+                                if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+                                setAvatarPreview(null);
+                                setAvatarFile(null);
+                              }}
                               className="px-3 py-2 text-sm text-red-600 hover:underline"
                             >
                               Retirer
@@ -373,6 +369,38 @@ export default function Profile() {
               )}
             </section>
           </div>
+        </div>
+
+        {/* Mes critiques */}
+        <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Mes critiques</h3>
+
+          {loadingReviews ? (
+            <p className="text-gray-500">Chargement des critiques...</p>
+          ) : reviews.length > 0 ? (
+            <ul className="space-y-4">
+              {reviews.map((review) => (
+                <li key={review.id} className="border rounded-md p-4">
+                  <h4 className="font-semibold text-gray-900">{review.filmTitle}</h4>
+                  <p className="text-gray-700 mt-1">{review.content}</p>
+                  <div className="text-sm text-gray-500 mt-2">
+                    Note : {review.rating}/5 • Publié le{" "}
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </div>
+                  <div className="mt-2 flex gap-2">
+                    <button className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                      Modifier
+                    </button>
+                    <button className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200">
+                      Supprimer
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500">Vous n’avez pas encore rédigé de critiques.</p>
+          )}
         </div>
       </div>
     </div>
