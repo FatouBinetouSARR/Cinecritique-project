@@ -24,7 +24,7 @@ export default function Login() {
     try {
       await login(formData.email, formData.password);
       toast.success("Connexion réussie !");
-      navigate("/profile"); // ou "/dashboard"
+      navigate("/");
     } catch {
       toast.error("Email ou mot de passe incorrect");
     } finally {
