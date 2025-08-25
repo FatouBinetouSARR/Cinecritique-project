@@ -1,5 +1,7 @@
+// src/pages/Account.tsx
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../lib/useAuth";
+import { apiFetch } from "../../lib/apiFetch";
 
 interface ProfileData {
   id: number;
@@ -11,67 +13,43 @@ interface ProfileData {
 }
 
 export default function Profile() {
-  const navigate = useNavigate();
+  const { accessToken, logout } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const accessToken = localStorage.getItem("accessToken");
-        if (!accessToken) {
-          navigate("/login");
-          return;
-        }
-
-        const response = await fetch("/api/profile", {
-          headers: {
-            "Authorization": `Bearer ${accessToken}`,
-          },
-          credentials: "include",
+        const res = await apiFetch("/api/profile", {
+          method: "GET",
+          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
         });
-
-        if (response.ok) {
-          const data = await response.json();
+        if (res.ok) {
+          const data = await res.json();
           setProfile(data);
-        } else if (response.status === 401) {
-          // Token expiré ou invalide
-          localStorage.removeItem("accessToken");
-          navigate("/login");
+        } else if (res.status === 401) {
+          await logout(); // PrivateRoute gérera la redirection
         } else {
           setError("Impossible de charger le profil");
         }
-      } catch {
-        setError("Erreur de connexion au serveur");
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [navigate]);
+  }, [accessToken, logout]);
 
-  const handleLogout = () => {
-    // Appeler l'API de logout
-    fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    }).finally(() => {
-      // Nettoyer le localStorage et rediriger
-      localStorage.removeItem("accessToken");
-      navigate("/login");
-    });
+  const handleLogout = async () => {
+    await logout();
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <svg className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
+          <div className="animate-spin h-12 w-12 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
           <p className="text-gray-600">Chargement du profil...</p>
         </div>
       </div>
@@ -83,25 +61,8 @@ export default function Profile() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="rounded-md bg-red-50 p-4 max-w-md">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
-                  {error}
-                </h3>
-              </div>
-            </div>
+            <p className="text-red-800">{error}</p>
           </div>
-          <button
-            onClick={() => navigate("/login")}
-            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            Retour à la connexion
-          </button>
         </div>
       </div>
     );
@@ -119,40 +80,40 @@ export default function Profile() {
               Informations de votre compte CineCritique
             </p>
           </div>
-          
+
           <div className="border-t border-gray-200">
             <dl>
               <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">ID</dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{profile?.id}</dd>
               </div>
-              
+
               <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">Email</dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{profile?.email}</dd>
               </div>
-              
+
               {profile?.prenom && (
                 <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                   <dt className="text-sm font-medium text-gray-500">Prénom</dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{profile.prenom}</dd>
                 </div>
               )}
-              
+
               {profile?.nom && (
                 <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                   <dt className="text-sm font-medium text-gray-500">Nom</dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{profile.nom}</dd>
                 </div>
               )}
-              
+
               {profile?.adresse && (
                 <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                   <dt className="text-sm font-medium text-gray-500">Adresse</dt>
                   <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{profile.adresse}</dd>
                 </div>
               )}
-              
+
               {profile?.age && (
                 <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                   <dt className="text-sm font-medium text-gray-500">Âge</dt>
@@ -161,7 +122,7 @@ export default function Profile() {
               )}
             </dl>
           </div>
-          
+
           <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
             <button
               onClick={handleLogout}
@@ -175,5 +136,3 @@ export default function Profile() {
     </div>
   );
 }
-
-

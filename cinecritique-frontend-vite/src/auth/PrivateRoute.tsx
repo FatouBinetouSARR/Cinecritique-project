@@ -8,7 +8,15 @@ interface PrivateRouteProps {
 }
 
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, authLoading } = useAuth();
+
+  if (authLoading) {
+    return (
+      <div className="min-h-[50vh] w-full flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-2 border-white border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   // Si l'utilisateur n'est pas connecté, redirige vers la page de login
   if (!isAuthenticated) {

@@ -1,17 +1,9 @@
 // src/components/Header.tsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Search, User, Film, LogOut, Settings, Menu, X } from "lucide-react";
+import { Search, User, Film, LogOut, Menu, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/Input";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from "../ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "../ui/avatar";
 import { useAuth } from "../lib/useAuth";
 
 export const Header: React.FC = () => {
@@ -20,11 +12,7 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { user, isAuthenticated, logout } = useAuth();
-
-  // Affiche la partie avant le @ comme pseudo
-  const username = user?.email.split("@")[0] || "U";
-  const email = user?.email || "";
+  const { isAuthenticated, authLoading, logout } = useAuth();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +39,13 @@ export const Header: React.FC = () => {
         ]
       : []),
   ];
+
+  // Fermer le menu mobile lors du changement de route ou de l'état auth
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname, isAuthenticated]);
+
+  if (authLoading) return null; // Évite le flicker avant le refresh
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-secondary bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
@@ -100,39 +95,11 @@ export const Header: React.FC = () => {
         {/* User Menu */}
         <div className="flex items-center space-x-4">
           {isAuthenticated ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Avatar className="h-8 w-8 rounded-full cursor-pointer">
-                  <AvatarFallback>{username.charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <div className="flex items-center gap-2 p-2">
-                  <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium text-white">{username}</p>
-                    <p className="w-[200px] truncate text-sm text-white/70">{email}</p>
-                  </div>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link to="/profile" className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-white" /> Profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link to="/settings" className="flex items-center gap-2">
-                    <Settings className="h-4 w-4 text-white" /> Settings
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <span className="flex items-center gap-2">
-                    <LogOut className="h-4 w-4 text-white" />
-                    Déconnexion
-                  </span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="hidden sm:flex items-center space-x-2">
+              <Button onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-1" /> Déconnexion
+              </Button>
+            </div>
           ) : (
             <div className="hidden sm:flex items-center space-x-2">
               <Button asChild variant="ghost">
@@ -181,7 +148,16 @@ export const Header: React.FC = () => {
                 {link.icon || null} {link.label}
               </Link>
             ))}
-            {!isAuthenticated && (
+            {isAuthenticated ? (
+              <div className="flex flex-col space-y-2 mt-2">
+                <button
+                  onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
+                  className="text-left text-white px-2 py-1 rounded hover:bg-secondary/20"
+                >
+                  Déconnexion
+                </button>
+              </div>
+            ) : (
               <div className="flex flex-col space-y-2 mt-2">
                 <Link
                   to="/login"

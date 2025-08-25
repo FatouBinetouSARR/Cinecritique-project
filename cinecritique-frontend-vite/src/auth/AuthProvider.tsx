@@ -7,6 +7,7 @@ import { apiFetch } from "../lib/apiFetch";
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState<boolean>(true);
   const refreshInProgressRef = useRef<Promise<string | null> | null>(null);
 
   const isAuthenticated = !!accessToken;
@@ -60,12 +61,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    performRefresh();
+    (async () => {
+      try {
+        await performRefresh();
+      } finally {
+        setAuthLoading(false);
+      }
+    })();
   }, [performRefresh]);
 
   const value = useMemo(
-    () => ({ user, accessToken, isAuthenticated, login, register, logout }),
-    [user, accessToken, isAuthenticated, login, register, logout]
+    () => ({ user, accessToken, isAuthenticated, authLoading, login, register, logout }),
+    [user, accessToken, isAuthenticated, authLoading, login, register, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
