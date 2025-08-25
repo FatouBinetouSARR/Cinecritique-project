@@ -1,21 +1,12 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-<<<<<<< HEAD
-import { HomePage } from "./components/Home/HomePage";
-import { Layout } from "./layouts/Layout";
-import Login from "./components/login-register/Login";
-import Register from "./components/login-register/Register";
-import Profile from "./components/profile/Profile";
-// import { PrivateRoute } from "./auth/PrivateRoute";
-=======
->>>>>>> ebaa17ee988b0538bbbb667d380cf5a29337a7ba
 import { Toaster } from "react-hot-toast";
 
 // Layout
 import { Layout } from "./layouts/Layout";
 
 // Pages principales
-import { HomePage } from "./components/home/HomePage";
+import { HomePage } from "./components/Home/HomePage";
 import Login from "./components/login-register/Login";
 import Register from "./components/login-register/Register";
 import Profile from "./components/account/Account";
