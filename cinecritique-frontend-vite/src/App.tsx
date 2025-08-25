@@ -9,7 +9,7 @@ import { Layout } from "./layouts/Layout";
 import { HomePage } from "./components/home/HomePage";
 import Login from "./components/login-register/Login";
 import Register from "./components/login-register/Register";
-import Profile from "./components/profile/Profile";
+import Profile from "./components/account/Account";
 
 // Pages Films
 import { MoviesPage } from "./components/movies/MoviesPage";
@@ -18,7 +18,7 @@ import { MoviesSearchResults } from "./components/movies/MoviesSearchResults";
 import { MoviesId } from "./components/movies/MoviesId";
 
 // Pages Personnes / Critiques
-import { PersonPage } from "./components/person/PersonPage";
+import { PersonPage } from "./components/acteurs/ActeursPage";
 import { ReviewsPage } from "./components/reviews/ReviewsPage";
 import { CriticsPage } from "./components/membres/MembrePage";
 

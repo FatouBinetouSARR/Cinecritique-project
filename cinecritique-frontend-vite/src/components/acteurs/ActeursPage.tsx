@@ -1,4 +1,3 @@
-// src/components/person/PersonPage.tsx
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -53,14 +52,15 @@ export const PersonPage: React.FC = () => {
             className="w-48 h-64 object-cover rounded-lg shadow-md"
           />
         ) : (
-          <div className="w-48 h-64 bg-gray-700 rounded-lg flex items-center justify-center">
+          <div className="w-48 h-64 bg-gray-700 rounded-lg flex items-center justify-center text-gray-400">
             Pas d'image
           </div>
         )}
         <div>
           <h1 className="text-4xl font-bold">{person.name}</h1>
           <p className="text-gray-400 mt-1">
-            {person.birthday} • {person.place_of_birth}
+            {person.birthday || "Date de naissance inconnue"} •{" "}
+            {person.place_of_birth || "Lieu de naissance inconnu"}
           </p>
           <p className="mt-4 text-gray-300 leading-relaxed max-w-2xl">
             {person.biography || "Aucune biographie disponible."}
@@ -74,7 +74,7 @@ export const PersonPage: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
           {person.combined_credits?.cast
             .filter((m) => m.poster_path)
-            .slice(0, 18) // limite pour pas tout casser
+            .slice(0, 18)
             .map((m) => (
               <Link
                 key={m.id}
@@ -89,7 +89,9 @@ export const PersonPage: React.FC = () => {
                 <p className="mt-2 text-sm font-semibold truncate group-hover:text-yellow-400">
                   {m.title || m.name}
                 </p>
-                <p className="text-xs text-gray-400">{m.character}</p>
+                <p className="text-xs text-gray-400">
+                  {m.character || "Rôle inconnu"}
+                </p>
               </Link>
             ))}
         </div>
@@ -101,7 +103,7 @@ export const PersonPage: React.FC = () => {
           to="/movies"
           className="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-400"
         >
-          ⬅ Retour
+          ⬅ Retour aux films
         </Link>
       </div>
     </div>

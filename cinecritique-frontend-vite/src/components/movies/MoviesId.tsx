@@ -1,9 +1,7 @@
-// src/components/movies/MoviesId.tsx
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Star, Play, X } from "lucide-react";
 import { ReviewsPage } from "../reviews/ReviewsPage";
-import { Link } from "react-router-dom";
 
 interface MovieDetails {
   id: number;
@@ -32,17 +30,14 @@ export const MoviesId: React.FC = () => {
   useEffect(() => {
     const fetchMovie = async () => {
       const res = await fetch(
-        `https://api.themoviedb.org/3/movie/${id}?api_key=${import.meta.env.VITE_TMDB_API_KEY
-        }&append_to_response=credits,videos`
+        `https://api.themoviedb.org/3/movie/${id}?api_key=${import.meta.env.VITE_TMDB_API_KEY}&append_to_response=credits,videos`
       );
       const data = await res.json();
 
-      // 🔥 Cherche la bande-annonce YouTube
       const ytTrailer = data.videos?.results.find(
         (v: { key: string; site: string; type: string; name: string }) =>
           v.site === "YouTube" && v.type === "Trailer"
       );
-
 
       setMovie(data);
       setTrailerKey(ytTrailer ? ytTrailer.key : null);
@@ -55,27 +50,22 @@ export const MoviesId: React.FC = () => {
     return <div className="text-center p-10 text-gray-400">Chargement...</div>;
   }
 
-  // ✅ Fallback backdrop
-  const backdropUrl = movie.backdrop_path
-    ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}`
-    : "/fallback-bg.jpg"; // mets une image par défaut dans /public
-
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* 🎬 Backdrop */}
-      <div
-        className="relative h-[50vh] bg-cover bg-center"
-        style={{ backgroundImage: `url(${backdropUrl})` }}
-      >
-        <div className="absolute inset-0 bg-black bg-opacity-60 flex items-end">
-          <div className="p-6 md:p-12">
+      {movie.backdrop_path && (
+        <div
+          className="relative h-[60vh] bg-cover bg-center"
+          style={{ backgroundImage: `url(https://image.tmdb.org/t/p/original${movie.backdrop_path})` }}
+        >
+          <div className="absolute inset-0 bg-black/70"></div>
+          <div className="absolute bottom-8 left-8 max-w-2xl">
             <h1 className="text-4xl md:text-5xl font-bold">{movie.title}</h1>
-            <p className="text-gray-300 mt-2">
-              {movie.release_date} • {movie.runtime} min
-            </p>
+            <p className="mt-2 text-gray-300">{movie.release_date} • {movie.runtime} min</p>
+            <p className="mt-4 text-sm md:text-base max-w-xl text-gray-200">{movie.overview}</p>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 📝 Infos principales */}
       <div className="container mx-auto px-4 py-8 grid md:grid-cols-3 gap-8">
@@ -99,25 +89,17 @@ export const MoviesId: React.FC = () => {
           {/* Note */}
           <div className="flex items-center gap-2">
             <Star className="w-6 h-6 text-yellow-400" />
-            <span className="text-xl font-semibold">
-              {movie.vote_average.toFixed(1)} / 10
-            </span>
+            <span className="text-xl font-semibold">{movie.vote_average.toFixed(1)} / 10</span>
           </div>
 
           {/* Genres */}
           <div className="flex flex-wrap gap-2">
             {movie.genres.map((g) => (
-              <span
-                key={g.id}
-                className="px-3 py-1 bg-gray-800 rounded-full text-sm"
-              >
+              <span key={g.id} className="px-3 py-1 bg-gray-800 rounded-full text-sm">
                 {g.name}
               </span>
             ))}
           </div>
-
-          {/* Synopsis */}
-          <p className="text-gray-300 leading-relaxed">{movie.overview}</p>
 
           {/* Trailer */}
           {trailerKey && (
@@ -153,16 +135,13 @@ export const MoviesId: React.FC = () => {
                     Pas d’image
                   </div>
                 )}
-                <p className="font-semibold text-sm truncate group-hover:text-yellow-400">
-                  {actor.name}
-                </p>
+                <p className="font-semibold text-sm truncate group-hover:text-yellow-400">{actor.name}</p>
                 <p className="text-xs text-gray-400 truncate">{actor.character}</p>
               </Link>
             ))}
           </div>
         </div>
       )}
-
 
       {/* 💬 Critiques */}
       <div className="container mx-auto px-4 py-8">
@@ -190,7 +169,8 @@ export const MoviesId: React.FC = () => {
           </div>
         </div>
       )}
-        {/* Retour */}
+
+      {/* Retour */}
       <div className="text-center py-6">
         <Link
           to="/movies"
@@ -199,7 +179,6 @@ export const MoviesId: React.FC = () => {
           ⬅ Retour
         </Link>
       </div>
-
     </div>
   );
 };
