@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = "https://api.themoviedb.org/3";
 
-// 🟢 Ajout de "now_playing"
 export type Category = "popular" | "top_rated" | "upcoming" | "now_playing";
 
 export interface Movie {
@@ -17,7 +16,7 @@ export interface Movie {
   genre_ids: number[];
 }
 
-export const useMovies = (category: Category = "popular") => {
+export const useMovies = (category: Category = "popular", pages: number = 3) => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,14 +24,19 @@ export const useMovies = (category: Category = "popular") => {
     const fetchMovies = async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          `${BASE_URL}/movie/${category}?api_key=${API_KEY}&language=fr-FR&page=1`
-        );
-        if (!res.ok) {
-          throw new Error(`Erreur API: ${res.status}`);
+        const allMovies: Movie[] = [];
+
+        // Boucle sur les pages demandées
+        for (let page = 1; page <= pages; page++) {
+          const res = await fetch(
+            `${BASE_URL}/movie/${category}?api_key=${API_KEY}&language=fr-FR&page=${page}`
+          );
+          if (!res.ok) throw new Error(`Erreur API: ${res.status}`);
+          const data = await res.json();
+          allMovies.push(...(data.results || []));
         }
-        const data = await res.json();
-        setMovies(data.results || []);
+
+        setMovies(allMovies);
       } catch (err) {
         console.error("Erreur lors du chargement des films :", err);
         setMovies([]);
@@ -42,7 +46,7 @@ export const useMovies = (category: Category = "popular") => {
     };
 
     fetchMovies();
-  }, [category]);
+  }, [category, pages]);
 
   return { movies, loading };
 };

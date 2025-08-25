@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useMovies } from "../../hooks/useMovies";
 import type { Movie } from "../../hooks/useMovies";
 import { MoviesCard } from "./MoviesCard";
+import { Link } from "react-router-dom";
 
 export const MoviesGridPage: React.FC = () => {
   const { type } = useParams<{ type: string }>();
@@ -34,6 +35,15 @@ export const MoviesGridPage: React.FC = () => {
           <MoviesCard key={movie.id} movie={movie} />
         ))}
       </div>
+      {/* Retour */}
+            <div className="text-center py-6">
+              <Link
+                to="/movies"
+                className="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-400"
+              >
+                ⬅ Retour
+              </Link>
+            </div>
     </div>
   );
 };
