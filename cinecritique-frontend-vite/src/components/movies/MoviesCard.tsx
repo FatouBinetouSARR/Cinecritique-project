@@ -1,4 +1,4 @@
-// src/components/movies/MovieCard.tsx
+// src/components/movies/MoviesCard.tsx
 import { useNavigate } from "react-router-dom";
 
 interface Movie {
@@ -12,13 +12,13 @@ interface MovieCardProps {
   movie: Movie;
 }
 
-export const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
+export const MoviesCard: React.FC<MovieCardProps> = ({ movie }) => {
   const navigate = useNavigate();
   const year = new Date(movie.release_date).getFullYear();
 
   return (
     <div
-      onClick={() => navigate(`/movie/${movie.id}`)}
+      onClick={() => navigate(`/movies/${movie.id}`)}
       className="group relative cursor-pointer overflow-hidden rounded-lg shadow-md w-full h-full"
     >
       <img

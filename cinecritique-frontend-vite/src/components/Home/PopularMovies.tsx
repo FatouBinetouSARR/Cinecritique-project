@@ -1,6 +1,6 @@
 // src/components/home/PopularMovies.tsx
 import React, { useEffect, useState } from "react";
-import { MovieCard } from "../movies/MovieCard";
+import { MoviesCard } from "../movies/MoviesCard";
 import { getPopularMovies } from "../../api/tmdb";
 
 interface Movie {
@@ -37,7 +37,7 @@ export const PopularMovies: React.FC = () => {
               key={movie.id}
               className="flex-shrink-0 w-[40%] sm:w-[35%] md:w-[25%] lg:w-[15%]"
             >
-              <MovieCard movie={movie} />
+              <MoviesCard movie={movie} />
             </div>
           ))}
         </div>
