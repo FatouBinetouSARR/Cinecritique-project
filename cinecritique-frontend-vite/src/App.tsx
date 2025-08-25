@@ -1,58 +1,85 @@
+import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { HomePage } from "./components/home/HomePage";
+import { Toaster } from "react-hot-toast";
+
+// Layout
 import { Layout } from "./layouts/Layout";
+
+// Pages principales
+import { HomePage } from "./components/home/HomePage";
 import Login from "./components/login-register/Login";
 import Register from "./components/login-register/Register";
 import Profile from "./components/profile/Profile";
-// import { PrivateRoute } from "./auth/PrivateRoute";
-import { Toaster } from "react-hot-toast";
 
-import { MoviesPage } from "./components/top-rated/MoviesPage";
+// Pages Films
+import { MoviesPage } from "./components/movies/MoviesPage";
+import { MoviesGridPage } from "./components/movies/MoviesGridPage";
+import { MoviesSearchResults } from "./components/movies/MoviesSearchResults";
+import { MoviesId } from "./components/movies/MoviesId";
+
+// Pages Personnes / Critiques
+import { PersonPage } from "./components/person/PersonPage";
 import { ReviewsPage } from "./components/reviews/ReviewsPage";
 import { CriticsPage } from "./components/membres/MembrePage";
+
+// Auth / Routes privées (à décommenter si besoin)
+// import { PrivateRoute } from "./auth/PrivateRoute";
 
 const App: React.FC = () => {
   return (
     <>
       <Toaster position="top-right" reverseOrder={false} />
+
       <Layout>
         <Routes>
-          {/* Accueil */}
+          {/* ---------------------- Accueil ---------------------- */}
           <Route path="/" element={<HomePage />} />
 
-          {/* Auth */}
+          {/* ---------------------- Auth ------------------------- */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* Profil (protégé) */}
+          {/* ---------------------- Profil (protégé) ------------- */}
           <Route
             path="/profile"
             element={
+              // TODO: activer PrivateRoute pour sécuriser la page
               // <PrivateRoute>
                 <Profile />
               // </PrivateRoute>
             }
           />
 
-          {/* 🎬 Liste des films les mieux notés */}
-          <Route path="/top-rated" element={<MoviesPage />} />
+          {/* ---------------------- Personne --------------------- */}
+          <Route path="/person/:id" element={<PersonPage />} />
 
-          {/* Mes critiques */}
-          <Route path="/my-reviews" element={
-            // <PrivateRoute>
-            <ReviewsPage />
-            // </PrivateRoute>
-          } />
+          {/* ---------------------- Films ------------------------ */}
+          <Route path="/movies" element={<MoviesPage />} />
+          <Route path="/movies/:id" element={<MoviesId />} />
+          <Route path="/search" element={<MoviesSearchResults />} />
+          <Route path="/:type" element={<MoviesGridPage />} />
 
-          {/* Toutes les critiques */}
+          {/* ---------------------- Critiques -------------------- */}
+          <Route
+            path="/my-reviews"
+            element={
+              // TODO: activer PrivateRoute si nécessaire
+              // <PrivateRoute>
+                <ReviewsPage />
+              // </PrivateRoute>
+            }
+          />
           <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="/critics" element={<CriticsPage />} />
 
-
-          {/* Page 404 */}
+          {/* ---------------------- 404 -------------------------- */}
           <Route
             path="*"
-            element={<div className="text-center p-10">Page non trouvée 😢</div>}
+            element={
+              <div className="text-center p-10">
+                Page non trouvée 😢
+              </div>
+            }
           />
         </Routes>
       </Layout>

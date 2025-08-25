@@ -1,10 +1,10 @@
-// src/hooks/useMovies.ts
 import { useEffect, useState } from "react";
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const BASE_URL = "https://api.themoviedb.org/3";
 
-type Category = "popular" | "top_rated" | "upcoming";
+// 🟢 Ajout de "now_playing"
+export type Category = "popular" | "top_rated" | "upcoming" | "now_playing";
 
 export interface Movie {
   id: number;
@@ -28,10 +28,14 @@ export const useMovies = (category: Category = "popular") => {
         const res = await fetch(
           `${BASE_URL}/movie/${category}?api_key=${API_KEY}&language=fr-FR&page=1`
         );
+        if (!res.ok) {
+          throw new Error(`Erreur API: ${res.status}`);
+        }
         const data = await res.json();
         setMovies(data.results || []);
       } catch (err) {
-        console.error(err);
+        console.error("Erreur lors du chargement des films :", err);
+        setMovies([]);
       } finally {
         setLoading(false);
       }

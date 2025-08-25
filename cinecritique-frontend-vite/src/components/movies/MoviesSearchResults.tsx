@@ -1,7 +1,7 @@
-// src/components/search/SearchResultsPage.tsx
+// src/components/movies/MoviesSearchResults.tsx
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { CompactMovieCard } from "../top-rated/CompactMovieCard";
+// import { CompactMovieCard } from "./CompactMovieCard";
 
 interface Movie {
   id: number;
@@ -11,7 +11,7 @@ interface Movie {
   fileSize?: string;
 }
 
-export const SearchResultsPage: React.FC = () => {
+export const MoviesSearchResults: React.FC = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const q = queryParams.get("q") || "";
@@ -62,7 +62,7 @@ export const SearchResultsPage: React.FC = () => {
       <h2 className="text-xl font-bold mb-4">Résultats pour "{q}"</h2>
 
       {/* Résultats sous forme de grille */}
-      <div className="flex flex-wrap gap-4">
+      {/* <div className="flex flex-wrap gap-4">
         {movies.map((movie) => (
           <CompactMovieCard
             key={movie.id}
@@ -77,7 +77,7 @@ export const SearchResultsPage: React.FC = () => {
             }}
           />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };
