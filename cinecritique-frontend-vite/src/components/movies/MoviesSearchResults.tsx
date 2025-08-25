@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { MoviesCard } from "./MoviesCard";
+import { Link } from "react-router-dom";
 
 interface Movie {
   id: number;
@@ -64,6 +65,15 @@ export const MoviesSearchResults: React.FC = () => {
           <MoviesCard key={movie.id} movie={movie} />
         ))}
       </div>
+      {/* Retour */}
+            <div className="text-center py-6">
+              <Link
+                to="/movies"
+                className="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-400"
+              >
+                ⬅ Retour
+              </Link>
+            </div>
     </div>
   );
 };
