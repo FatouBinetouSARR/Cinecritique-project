@@ -22,57 +22,56 @@ import { PersonPage } from "./components/acteurs/ActeursPage";
 import { ReviewsPage } from "./components/reviews/ReviewsPage";
 import { CriticsPage } from "./components/membres/MembrePage";
 
-// Auth / Routes privées (à décommenter si besoin)
-// import { PrivateRoute } from "./auth/PrivateRoute";
+// Auth
+import { AuthProvider } from "./auth/AuthProvider";
+import { PrivateRoute } from "./auth/PrivateRoute"; // à créer pour sécuriser
 
 const App: React.FC = () => {
   return (
-    <>
+    <AuthProvider>
       <Toaster position="top-right" reverseOrder={false} />
 
       <Layout>
         <Routes>
-          {/* ---------------------- Accueil ---------------------- */}
+          {/* Accueil */}
           <Route path="/" element={<HomePage />} />
 
-          {/* ---------------------- Auth ------------------------- */}
+          {/* Auth */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
-          {/* ---------------------- Profil (protégé) ------------- */}
+          {/* Profil protégé */}
           <Route
             path="/profile"
             element={
-              // TODO: activer PrivateRoute pour sécuriser la page
-              // <PrivateRoute>
+              <PrivateRoute>
                 <Profile />
-              // </PrivateRoute>
+              </PrivateRoute>
             }
           />
 
-          {/* ---------------------- Personne --------------------- */}
+          {/* Personne */}
           <Route path="/person/:id" element={<PersonPage />} />
 
-          {/* ---------------------- Films ------------------------ */}
+          {/* Films */}
           <Route path="/movies" element={<MoviesPage />} />
           <Route path="/movies/:id" element={<MoviesId />} />
           <Route path="/search" element={<MoviesSearchResults />} />
           <Route path="/:type" element={<MoviesGridPage />} />
 
-          {/* ---------------------- Critiques -------------------- */}
+          {/* Critiques */}
           <Route
             path="/my-reviews"
             element={
-              // TODO: activer PrivateRoute si nécessaire
-              // <PrivateRoute>
+              <PrivateRoute>
                 <ReviewsPage />
-              // </PrivateRoute>
+              </PrivateRoute>
             }
           />
           <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="/critics" element={<CriticsPage />} />
 
-          {/* ---------------------- 404 -------------------------- */}
+          {/* 404 */}
           <Route
             path="*"
             element={
@@ -83,7 +82,7 @@ const App: React.FC = () => {
           />
         </Routes>
       </Layout>
-    </>
+    </AuthProvider>
   );
 };
 

@@ -1,5 +1,6 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
+// src/components/Header.tsx
 import { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Search, User, Film, LogOut, Settings, Menu, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/Input";
@@ -11,6 +12,7 @@ import {
   DropdownMenuSeparator,
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "../ui/avatar";
+import { useAuth } from "../lib/useAuth";
 
 export const Header: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -18,9 +20,11 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isAuthenticated = !!localStorage.getItem("accessToken");
-  const username = localStorage.getItem("username") || "U";
-  const email = localStorage.getItem("email") || "";
+  const { user, isAuthenticated, logout } = useAuth();
+
+  // Affiche la partie avant le @ comme pseudo
+  const username = user?.email.split("@")[0] || "U";
+  const email = user?.email || "";
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,19 +36,20 @@ export const Header: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("username");
-    localStorage.removeItem("email");
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
   };
 
   const links = [
     { label: "Films", path: "/movies", icon: <Film className="h-4 w-4" /> },
     { label: "Membres", path: "/critics" },
-    { label: "Mes avis", path: "/my-reviews"},
-    { label: "Profile", path: "/profile", icon: <User className="h-4 w-4" /> },
-    ...(isAuthenticated ? [{ label: "", path: "" }] : []),
+    ...(isAuthenticated
+      ? [
+          { label: "Mes avis", path: "/my-reviews" },
+          { label: "Profile", path: "/profile", icon: <User className="h-4 w-4" /> },
+        ]
+      : []),
   ];
 
   return (
@@ -79,10 +84,7 @@ export const Header: React.FC = () => {
         </nav>
 
         {/* Search bar desktop */}
-        <form
-          onSubmit={handleSearch}
-          className="flex-1 max-w-sm mx-4 hidden sm:block"
-        >
+        <form onSubmit={handleSearch} className="flex-1 max-w-sm mx-4 hidden sm:block">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white h-4 w-4" />
             <Input
@@ -156,10 +158,7 @@ export const Header: React.FC = () => {
       {/* Mobile menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-black/95 backdrop-blur border-t border-secondary">
-          <form
-            onSubmit={handleSearch}
-            className="p-4 flex items-center space-x-2"
-          >
+          <form onSubmit={handleSearch} className="p-4 flex items-center space-x-2">
             <Input
               type="search"
               placeholder="Rechercher..."
@@ -206,7 +205,3 @@ export const Header: React.FC = () => {
     </header>
   );
 };
-
-
-
-
