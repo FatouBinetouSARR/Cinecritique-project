@@ -1,14 +1,15 @@
 // src/components/movies/MoviesSearchResults.tsx
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-// import { CompactMovieCard } from "./CompactMovieCard";
+import { MoviesCard } from "./MoviesCard";
 
 interface Movie {
   id: number;
-  poster_path: string;
+  title: string;
+  release_date: string;
+  poster_path: string | null;
   vote_average: number;
   vote_count: number;
-  fileSize?: string;
 }
 
 export const MoviesSearchResults: React.FC = () => {
@@ -21,23 +22,19 @@ export const MoviesSearchResults: React.FC = () => {
 
   useEffect(() => {
     if (!q) return;
+
     const fetchMovies = async () => {
       setLoading(true);
       try {
         const res = await fetch(
-          `https://api.themoviedb.org/3/search/movie?api_key=<<YOUR_TMDB_KEY>>&query=${encodeURIComponent(
-            q
-          )}&language=fr-FR&page=1`
+          `https://api.themoviedb.org/3/search/movie?api_key=${
+            import.meta.env.VITE_TMDB_API_KEY
+          }&query=${encodeURIComponent(q)}&language=fr-FR&page=1`
         );
         const data = await res.json();
-        setMovies(
-          data.results.map((m: Movie) => ({
-            ...m,
-            fileSize: "368 Ko", // tu peux calculer la taille réelle si tu veux
-          }))
-        );
+        setMovies(data.results || []);
       } catch (err) {
-        console.error(err);
+        console.error("Erreur recherche :", err);
         setMovies([]);
       } finally {
         setLoading(false);
@@ -59,25 +56,14 @@ export const MoviesSearchResults: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white px-4 py-6">
-      <h2 className="text-xl font-bold mb-4">Résultats pour "{q}"</h2>
+      <h2 className="text-xl font-bold mb-6">Résultats pour "{q}"</h2>
 
-      {/* Résultats sous forme de grille */}
-      {/* <div className="flex flex-wrap gap-4">
+      {/* Résultats en grille */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {movies.map((movie) => (
-          <CompactMovieCard
-            key={movie.id}
-            movie={{
-              id: movie.id,
-              posterPath: movie.poster_path
-                ? `https://image.tmdb.org/t/p/w200${movie.poster_path}`
-                : "/placeholder.png",
-              rating: Math.round(movie.vote_average * 10) / 10,
-              reviewCount: movie.vote_count,
-              fileSize: movie.fileSize!,
-            }}
-          />
+          <MoviesCard key={movie.id} movie={movie} />
         ))}
-      </div> */}
+      </div>
     </div>
   );
 };
