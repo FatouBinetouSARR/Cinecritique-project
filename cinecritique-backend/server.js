@@ -5,10 +5,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
+const User = require("./models/User");
 
 dotenv.config();
-
-const User = require("./models/User");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -25,7 +24,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "dev_refresh_secret
 const ACCESS_TOKEN_EXPIRES_IN = process.env.ACCESS_TOKEN_EXPIRES_IN || "15m";
 const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || "7d";
 
-const refreshTokensStore = new Map(); // On garde la rotation côté serveur
+const refreshTokensStore = new Map();
 
 function signAccessToken(payload) {
   return jwt.sign(payload, JWT_ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN });
@@ -74,9 +73,9 @@ async function authenticateAccessToken(req, res, next) {
   }
 }
 
-// Connexion à MongoDB
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("✅ Connecté à MongoDB"))
+// Connexion à MongoDB Atlas
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ Connecté à MongoDB Atlas"))
   .catch(err => console.error("❌ Erreur MongoDB :", err));
 
 // Routes
@@ -105,11 +104,11 @@ app.post("/api/auth/register", async (req, res) => {
       user: { id: newUser._id, email: normalizedEmail },
       accessToken
     });
-  } catch {
+  } catch (err) {
+    console.error("❌ Erreur lors de l'inscription :", err);
     res.status(500).json({ message: "Erreur lors de l'inscription" });
   }
 });
-
 
 // Connexion
 app.post("/api/auth/login", async (req, res) => {
@@ -133,7 +132,6 @@ app.post("/api/auth/login", async (req, res) => {
   });
 });
 
-
 // Profile
 app.get("/api/profile", authenticateAccessToken, async (req, res) => {
   const user = await User.findById(req.userId).select("-passwordHash");
@@ -141,8 +139,37 @@ app.get("/api/profile", authenticateAccessToken, async (req, res) => {
   res.status(200).json(user);
 });
 
-// Refresh token et logout (reste identique à ton ancien code)
+// Rafraîchissement du token
+app.post("/api/auth/refresh", async (req, res) => {
+  try {
+    const { refreshToken } = req.cookies || {};
+    if (!refreshToken) return res.status(401).json({ message: "Refresh token manquant" });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`);
+    const payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
+    const stored = refreshTokensStore.get(refreshToken);
+    if (!stored || stored.userId !== payload.userId)
+      return res.status(401).json({ message: "Refresh token invalide" });
+
+    const user = await User.findById(payload.userId);
+    if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
+
+    const { accessToken, refreshToken: newRefreshToken } = generateTokens(user);
+    refreshTokensStore.delete(refreshToken);
+    refreshTokensStore.set(newRefreshToken, { userId: user._id });
+    setRefreshTokenCookie(res, newRefreshToken);
+
+    res.status(200).json({ user: { id: user._id, email: user.email }, accessToken });
+  } catch {
+    return res.status(401).json({ message: "Refresh token invalide ou expiré" });
+  }
 });
+
+// Déconnexion
+app.post("/api/auth/logout", (req, res) => {
+  const { refreshToken } = req.cookies || {};
+  if (refreshToken) refreshTokensStore.delete(refreshToken);
+  clearRefreshTokenCookie(res);
+  res.status(200).json({ message: "Déconnecté" });
+});
+
+app.listen(PORT, () => console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`));
