@@ -22,6 +22,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (data?.accessToken) {
           setAccessToken(data.accessToken);
           setUser({ id: data.user.id, email: data.user.email });
+          // Persist for axios interceptor and components using localStorage
+          localStorage.setItem("accessToken", data.accessToken);
+          localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
           return data.accessToken;
         }
         return null;
@@ -41,6 +44,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const data = await res.json();
     setUser({ id: data.user.id, email: data.user.email });
     setAccessToken(data.accessToken);
+    localStorage.setItem("accessToken", data.accessToken);
+    localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
   }, []);
 
   const register = useCallback(async (email: string, password: string) => {
@@ -52,12 +57,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const data = await res.json();
     setUser({ id: data.user.id, email: data.user.email });
     setAccessToken(data.accessToken);
+    localStorage.setItem("accessToken", data.accessToken);
+    localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
   }, []);
 
   const logout = useCallback(async () => {
     await apiFetch("/api/auth/logout", { method: "POST" });
     setUser(null);
     setAccessToken(null);
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("user");
   }, []);
 
   useEffect(() => {

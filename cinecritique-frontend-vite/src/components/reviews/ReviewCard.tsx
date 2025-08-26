@@ -1,89 +1,110 @@
-// src/components/Reviews/ReviewCard.tsx
-import React from "react";
-import { Star, Edit, Trash2 } from "lucide-react";
+// src/components/reviews/ReviewCard.tsx
+import React, { useState } from "react";
+import { Star, Edit, Trash2, Save } from "lucide-react";
 import { Button } from "../../ui/button";
-import { dataMovies } from "../../data/dataMovies";
-import { dataUsers } from "../../data/dataUser";
-import { dataUserReviews } from "../../data/dataReviews"; 
 
 interface ReviewCardProps {
-  reviewId: number;
+  reviewId: string;
+  comment: string;
+  rating: number;
+  userName: string;
+  likes?: number;
   isOwner?: boolean;
-  onEdit?: (id: number) => void;
-  onDelete?: (id: number) => void;
+  onEdit?: (id: string, updatedText: string, updatedRating: number) => void;
+  onDelete?: (id: string) => void;
 }
 
 export const ReviewCard: React.FC<ReviewCardProps> = ({
   reviewId,
+  comment,
+  rating,
+  userName,
+  likes = 0,
   isOwner = false,
   onEdit,
   onDelete,
 }) => {
-  // 👉 On retrouve la review correspondante
-  const review = dataUserReviews.find((r) => r.id === reviewId);
-  if (!review) return null;
+  const [isEditing, setIsEditing] = useState(false);
+  const [editComment, setEditComment] = useState(comment);
+  const [editRating, setEditRating] = useState(rating);
 
-  const movie = dataMovies.find((m) => m.id === review.movieId);
-  const user = dataUsers.find((u) => u.id === review.userId);
-
-  const renderStars = (rating: number) =>
+  const renderStars = (rate: number) =>
     Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        className={`w-4 h-4 ${
-          i < rating ? "fill-yellow-400 text-yellow-400" : "text-gray-600"
-        }`}
+        className={`w-4 h-4 ${i < rate ? "fill-yellow-400 text-yellow-400" : "text-gray-600"}`}
       />
     ));
 
   return (
-    <div className=" rounded-lg shadow p-4 hover:shadow-lg transition">
-      <div className="flex gap-4">
-        {/* Affiche du film */}
-        <img
-          src={movie?.posterPath} // ⚠️ garder posterPath pour correspondre à ton ancien dataMovies
-          alt={movie?.title}
-          className="w-16 h-24 object-cover rounded-md"
-        />
-
-        {/* Contenu de la critique */}
-        <div className="flex-1">
-          <h3 className="text-lg font-bold text-white">{movie?.title}</h3>
-
-          {/* Étoiles + note */}
-          <div className="flex items-center gap-2">
-            {renderStars(review.rating)}
-            <span className="text-sm text-yellow-400">{review.rating}/5</span>
+    <div className="rounded-lg shadow p-4 hover:shadow-lg transition bg-gray-800">
+      <div>
+        <div className="flex justify-between items-start">
+          <div>
+            <p className="text-sm text-gray-400 mb-1">{userName}</p>
+            {isEditing ? (
+              <>
+                <textarea
+                  value={editComment}
+                  onChange={(e) => setEditComment(e.target.value)}
+                  className="w-full rounded-md bg-gray-900 border border-gray-700 text-white p-2 mb-2"
+                  rows={2}
+                />
+                <div className="flex items-center gap-1 mb-2">
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <Star
+                      key={i}
+                      onClick={() => setEditRating(i + 1)}
+                      className={`w-5 h-5 cursor-pointer ${
+                        i < editRating ? "fill-yellow-400 text-yellow-400" : "text-gray-600"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-1">{renderStars(rating)}</div>
+                <p className="text-white/80 mt-1">{comment}</p>
+              </>
+            )}
           </div>
 
-          {/* Commentaire */}
-          <p className="text-sm text-white/80 mt-2">{review.comment}</p>
-
-          {/* Auteur + likes */}
-          <p className="text-xs text-gray-400 mt-1">
-            par {user?.name} • {review.likes} likes
-          </p>
-
-          {/* Boutons si owner */}
           {isOwner && (
-            <div className="flex gap-2 mt-3">
-              <Button
-                size="sm"
-                onClick={() => onEdit?.(review.id)}
-                className="bg-gray-700 hover:bg-gray-600"
-              >
-                <Edit className="w-4 h-4 mr-1" /> Edit
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => onDelete?.(review.id)}
-                className="bg-red-600 hover:bg-red-500"
-              >
-                <Trash2 className="w-4 h-4 mr-1" /> Delete
-              </Button>
+            <div className="flex gap-2 ml-4">
+              {isEditing ? (
+                <Button
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-500"
+                  onClick={() => {
+                    onEdit?.(reviewId, editComment, editRating);
+                    setIsEditing(false);
+                  }}
+                >
+                  <Save className="w-4 h-4 mr-1" /> Sauvegarder
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    size="sm"
+                    className="bg-gray-700 hover:bg-gray-600"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <Edit className="w-4 h-4 mr-1" /> Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="bg-red-600 hover:bg-red-500"
+                    onClick={() => onDelete?.(reviewId)}
+                  >
+                    <Trash2 className="w-4 h-4 mr-1" /> Delete
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </div>
+        <p className="text-xs text-gray-400 mt-1">{likes} likes</p>
       </div>
     </div>
   );

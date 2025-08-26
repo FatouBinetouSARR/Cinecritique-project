@@ -28,7 +28,7 @@ export default function Register() {
     try {
       await register(formData.email, formData.password);
       toast.success("Inscription réussie !");
-      navigate("/login");
+      navigate("/");
     } catch {
       toast.error("Erreur lors de l'inscription");
     } finally {
