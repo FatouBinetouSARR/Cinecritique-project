@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../../lib/useAuth";
 import { apiFetch, API_URL } from "../../lib/apiFetch";
+import { ReviewsPage } from "../reviews/ReviewsPage";
 
 interface ProfileData {
   id: number;
@@ -11,20 +12,10 @@ interface ProfileData {
   avatarUrl?: string;
 }
 
-interface Review {
-  id: number;
-  filmTitle: string;
-  content: string;
-  rating: number;
-  createdAt: string;
-}
-
 export default function Profile() {
   const { accessToken, logout } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingReviews, setLoadingReviews] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -67,30 +58,6 @@ export default function Profile() {
     };
     fetchProfile();
   }, [authHeader, logout]);
-
-  // Charger critiques
-  useEffect(() => {
-    const fetchReviews = async () => {
-      setLoadingReviews(true);
-      try {
-        const res = await apiFetch("/api/reviews/me", {
-          method: "GET",
-          headers: authHeader,
-        });
-        if (res.ok) {
-          const data: Review[] = await res.json();
-          setReviews(data);
-        }
-      } catch {
-        console.error("Erreur lors du chargement des critiques");
-      } finally {
-        setLoadingReviews(false);
-      }
-    };
-    if (accessToken) {
-      fetchReviews();
-    }
-  }, [authHeader, accessToken]);
 
   useEffect(() => {
     return () => {
@@ -371,37 +338,8 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Mes critiques */}
-        <div className="bg-white shadow overflow-hidden sm:rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Mes critiques</h3>
-
-          {loadingReviews ? (
-            <p className="text-gray-500">Chargement des critiques...</p>
-          ) : reviews.length > 0 ? (
-            <ul className="space-y-4">
-              {reviews.map((review) => (
-                <li key={review.id} className="border rounded-md p-4">
-                  <h4 className="font-semibold text-gray-900">{review.filmTitle}</h4>
-                  <p className="text-gray-700 mt-1">{review.content}</p>
-                  <div className="text-sm text-gray-500 mt-2">
-                    Note : {review.rating}/5 • Publié le{" "}
-                    {new Date(review.createdAt).toLocaleDateString()}
-                  </div>
-                  <div className="mt-2 flex gap-2">
-                    <button className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
-                      Modifier
-                    </button>
-                    <button className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200">
-                      Supprimer
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-500">Vous n’avez pas encore rédigé de critiques.</p>
-          )}
-        </div>
+        {/* Mes critiques (réutilise ReviewsPage) */}
+        <ReviewsPage mode="mine" />
       </div>
     </div>
   );

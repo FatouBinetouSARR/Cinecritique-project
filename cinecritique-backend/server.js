@@ -86,10 +86,15 @@ mongoose.connect(process.env.MONGO_URI)
     try {
       const collection = Review.collection; // use model-bound collection
       const indexes = await collection.indexes();
+      if (process.env.NODE_ENV !== "production") {
+        console.log("ℹ️ Indexes (avant nettoyage):", indexes);
+      }
       const toDrop = indexes.filter((i) => {
         const key = i.key || {};
-        const hasFields = key.movieId === 1 && key.user === 1;
-        return hasFields && (i.unique === true);
+        const hasCompound = (key.movieId === 1 && key.user === 1) || (key.filmId === 1 && key.userId === 1);
+        const hasMovieOnly = (key.movieId === 1 && Object.keys(key).length === 1) || (key.filmId === 1 && Object.keys(key).length === 1);
+        const hasUserOnly = (key.user === 1 && Object.keys(key).length === 1) || (key.userId === 1 && Object.keys(key).length === 1);
+        return (hasCompound || hasMovieOnly || hasUserOnly) && (i.unique === true);
       });
       for (const idx of toDrop) {
         await collection.dropIndex(idx.name);
@@ -97,14 +102,20 @@ mongoose.connect(process.env.MONGO_URI)
       }
       // Fallback: en dev, s'il reste encore un index bloquant, on supprime tous les index
       if (process.env.NODE_ENV !== "production") {
-        const stillHas = (await collection.indexes()).some(i => {
+        const afterCheck = await collection.indexes();
+        const stillHas = afterCheck.some(i => {
           const k = i.key || {};
-          return k.movieId === 1 && k.user === 1 && i.unique === true;
+          const hasCompound = (k.movieId === 1 && k.user === 1) || (k.filmId === 1 && k.userId === 1);
+          const hasMovieOnly = (k.movieId === 1 && Object.keys(k).length === 1) || (k.filmId === 1 && Object.keys(k).length === 1);
+          const hasUserOnly = (k.user === 1 && Object.keys(k).length === 1) || (k.userId === 1 && Object.keys(k).length === 1);
+          return (hasCompound || hasMovieOnly || hasUserOnly) && i.unique === true;
         });
         if (stillHas) {
           await collection.dropIndexes();
           console.log("🧨 Tous les index de 'reviews' ont été supprimés en développement (fallback)");
         }
+        const finalIndexes = await collection.indexes();
+        console.log("ℹ️ Indexes (après nettoyage):", finalIndexes);
       }
     } catch (e) {
       // ignore if index not found or collection missing
