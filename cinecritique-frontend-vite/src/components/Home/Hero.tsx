@@ -1,6 +1,7 @@
 // src/components/home/Hero.tsx
 import React from "react";
 import { Button } from "../../ui/button";
+import { Link } from "react-router-dom";
 
 export const HeroSection: React.FC = () => {
   return (
@@ -29,15 +30,16 @@ export const HeroSection: React.FC = () => {
 
         {/* Boutons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="bg-secondary text-white hover:bg-secondary/90">
-            Créer un compte
+          <Button asChild size="lg" className="bg-secondary text-white hover:bg-secondary/90">
+            <Link to="/register">Créer un compte</Link>
           </Button>
           <Button
+            asChild
             size="lg"
             variant="ghost"
             className="text-white border border-secondary hover:bg-secondary/20"
           >
-            Explorer les films
+            <Link to="/movies">Explorer les films</Link>
           </Button>
         </div>
       </div>
