@@ -1,4 +1,3 @@
-// src/auth/AuthProvider.tsx
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { AuthContext } from "../lib/AuthContext";
 import type { User } from "../lib/authTypes";
@@ -12,6 +11,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isAuthenticated = !!accessToken;
 
+  // 🔄 Récupère un nouvel accessToken avec le refreshToken en cookie
   const performRefresh = useCallback(async (): Promise<string | null> => {
     if (refreshInProgressRef.current) return refreshInProgressRef.current;
     refreshInProgressRef.current = (async () => {
@@ -19,14 +19,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const res = await apiFetch("/api/auth/refresh", { method: "POST" });
         if (!res.ok) return null;
         const data = await res.json();
-        if (data?.accessToken) {
+        if (data?.accessToken && data?.user) {
           setAccessToken(data.accessToken);
           setUser({ id: data.user.id, email: data.user.email });
-          // Persist for axios interceptor and components using localStorage
+
+          // ✅ Persist in localStorage
           localStorage.setItem("accessToken", data.accessToken);
           localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
+
           return data.accessToken;
         }
+        return null;
+      } catch {
         return null;
       } finally {
         refreshInProgressRef.current = null;
@@ -35,6 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return refreshInProgressRef.current;
   }, []);
 
+  // 🔑 Login
   const login = useCallback(async (email: string, password: string) => {
     const res = await apiFetch("/api/auth/login", {
       method: "POST",
@@ -42,12 +47,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     if (!res.ok) throw new Error("Identifiants invalides");
     const data = await res.json();
+
     setUser({ id: data.user.id, email: data.user.email });
     setAccessToken(data.accessToken);
+
+    // ✅ Persist
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
   }, []);
 
+  // 📝 Register
   const register = useCallback(async (email: string, password: string) => {
     const res = await apiFetch("/api/auth/register", {
       method: "POST",
@@ -55,24 +64,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     if (!res.ok) throw new Error("Erreur lors de l'inscription");
     const data = await res.json();
+
     setUser({ id: data.user.id, email: data.user.email });
     setAccessToken(data.accessToken);
+
+    // ✅ Persist
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
   }, []);
 
+  // 🚪 Logout
   const logout = useCallback(async () => {
     await apiFetch("/api/auth/logout", { method: "POST" });
     setUser(null);
     setAccessToken(null);
+
+    // ✅ Clear localStorage
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
   }, []);
 
+  // 🏁 Initialisation au montage
   useEffect(() => {
     (async () => {
       try {
-        await performRefresh();
+        // 1. Charger depuis localStorage
+        const savedToken = localStorage.getItem("accessToken");
+        const savedUser = localStorage.getItem("user");
+
+        if (savedToken && savedUser) {
+          setAccessToken(savedToken);
+          setUser(JSON.parse(savedUser));
+        } else {
+          // 2. Sinon → tenter un refresh avec cookie httpOnly
+          await performRefresh();
+        }
       } finally {
         setAuthLoading(false);
       }
@@ -80,7 +106,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [performRefresh]);
 
   const value = useMemo(
-    () => ({ user, accessToken, isAuthenticated, authLoading, login, register, logout }),
+    () => ({
+      user,
+      accessToken,
+      isAuthenticated,
+      authLoading,
+      login,
+      register,
+      logout,
+    }),
     [user, accessToken, isAuthenticated, authLoading, login, register, logout]
   );
 
