@@ -6,7 +6,7 @@ import { Toaster } from "react-hot-toast";
 import { Layout } from "./layouts/Layout";
 
 // Pages principales
-import { HomePage } from "./components/Home/HomePage";
+import { HomePage } from "./components/home/HomePage";
 import Login from "./components/login-register/Login";
 import Register from "./components/login-register/Register";
 import Profile from "./components/account/Account";
