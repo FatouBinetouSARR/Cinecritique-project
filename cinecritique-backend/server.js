@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const User = require("./models/User");
+const Review = require("./models/Review"); // ensure model is registered so collection exists
 
 dotenv.config();
 
@@ -79,7 +80,39 @@ async function authenticateAccessToken(req, res, next) {
 
 // Connexion à MongoDB Atlas
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ Connecté à MongoDB Atlas"))
+  .then(async () => {
+    console.log("✅ Connecté à MongoDB Atlas");
+    // Drop legacy unique index on reviews to allow multiple reviews per user/movie
+    try {
+      const collection = Review.collection; // use model-bound collection
+      const indexes = await collection.indexes();
+      const toDrop = indexes.filter((i) => {
+        const key = i.key || {};
+        const hasFields = key.movieId === 1 && key.user === 1;
+        return hasFields && (i.unique === true);
+      });
+      for (const idx of toDrop) {
+        await collection.dropIndex(idx.name);
+        console.log(`🧹 Index unique supprimé: ${idx.name}`);
+      }
+      // Fallback: en dev, s'il reste encore un index bloquant, on supprime tous les index
+      if (process.env.NODE_ENV !== "production") {
+        const stillHas = (await collection.indexes()).some(i => {
+          const k = i.key || {};
+          return k.movieId === 1 && k.user === 1 && i.unique === true;
+        });
+        if (stillHas) {
+          await collection.dropIndexes();
+          console.log("🧨 Tous les index de 'reviews' ont été supprimés en développement (fallback)");
+        }
+      }
+    } catch (e) {
+      // ignore if index not found or collection missing
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("(Info) Impossible de supprimer l'index unique reviews:", e.message);
+      }
+    }
+  })
   .catch(err => console.error("❌ Erreur MongoDB :", err));
 
 // Routes
