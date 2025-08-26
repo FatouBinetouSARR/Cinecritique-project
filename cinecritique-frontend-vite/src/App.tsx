@@ -64,7 +64,7 @@ const App: React.FC = () => {
             path="/my-reviews"
             element={
               <PrivateRoute>
-                <ReviewsPage mode="mine" />
+                <ReviewsPage />
               </PrivateRoute>
             }
           />
