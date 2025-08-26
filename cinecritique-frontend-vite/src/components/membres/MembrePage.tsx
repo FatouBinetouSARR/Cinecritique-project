@@ -47,10 +47,8 @@ export const CriticsPage: React.FC = () => {
           </div>
 
           {/* Table-like header */}
-          <div className="grid grid-cols-5 px-4 py-2 bg-gray-800 text-gray-400 text-sm font-semibold rounded-t">
+          <div className="grid grid-cols-3 px-4 py-2 bg-gray-800 text-gray-400 text-sm font-semibold rounded-t">
             <span>Nom</span>
-            <span className="text-center">Regardé</span>
-            <span className="text-center">Listes</span>
             <span className="text-center">Goûts</span>
             <span className="text-right">Avis</span>
           </div>
@@ -60,7 +58,7 @@ export const CriticsPage: React.FC = () => {
             {sortedUsers.map((user, index) => (
               <div
                 key={user.id}
-                className="grid grid-cols-5 items-center px-4 py-3 hover:bg-gray-800 transition-colors"
+                className="grid grid-cols-3 items-center px-4 py-3 hover:bg-gray-800 transition-colors"
               >
                 {/* Nom + avatar */}
                 <div className="flex items-center gap-3">
@@ -73,13 +71,7 @@ export const CriticsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Stats en colonnes */}
-                <span className="text-center text-gray-300">
-                  👀 {user.moviesWatched.toLocaleString()}
-                </span>
-                <span className="text-center text-gray-300">
-                  📋 {user.lists.toLocaleString()}
-                </span>
+                {/* Likes / Goûts */}
                 <span className="text-center text-gray-300">
                   ❤️ {user.likes.toLocaleString()}
                 </span>
@@ -105,7 +97,7 @@ export const CriticsPage: React.FC = () => {
                 <div>
                   <p className="font-medium">{user.name}</p>
                   <p className="text-gray-400 text-sm">
-                    {user.moviesWatched.toLocaleString()} films, {user.reviews.toLocaleString()} critiques
+                    {user.reviews.toLocaleString()} critiques
                   </p>
                 </div>
               </Link>

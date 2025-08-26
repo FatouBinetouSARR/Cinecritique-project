@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { ReviewCard } from "../reviews/ReviewCard";
 import { dataUserReviews } from "../../data/dataReviews";
 import { dataUsers } from "../../data/dataUser";
-import { UserCard } from "../account/AccountCard";
+import { UserCard } from "../profile/ProfileCard";
 
 export const ReviewsFeed: React.FC = () => {
   return (

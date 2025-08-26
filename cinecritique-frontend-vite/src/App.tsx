@@ -9,7 +9,7 @@ import { Layout } from "./layouts/Layout";
 import { HomePage } from "./components/home/HomePage";
 import Login from "./components/login-register/Login";
 import Register from "./components/login-register/Register";
-import Profile from "./components/account/Account";
+import Profile from "./components/profile/ProfilePage";
 
 // Pages Films
 import { MoviesPage } from "./components/movies/MoviesPage";

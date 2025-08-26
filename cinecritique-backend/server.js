@@ -4,11 +4,11 @@ const cookieParser = require("cookie-parser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+dotenv.config();
 const mongoose = require("mongoose");
 const User = require("./models/User");
 const Review = require("./models/Review"); // ensure model is registered so collection exists
 
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
