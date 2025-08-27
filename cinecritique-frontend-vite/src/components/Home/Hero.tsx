@@ -30,8 +30,16 @@ export const HeroSection: React.FC = () => {
 
         {/* Boutons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild size="lg" className="bg-secondary text-white hover:bg-secondary/90">
-            <Link to="/register">Créer un compte</Link>
+          <Button
+            size="lg"
+            className="bg-secondary text-white hover:bg-secondary/90"
+            onClick={() => {
+              // Ouvre le modal d'authentification en mode inscription
+              window.dispatchEvent(new CustomEvent("switchAuthMode", { detail: "register" }));
+              window.dispatchEvent(new Event("openAuthModal"));
+            }}
+          >
+            Créer un compte
           </Button>
           <Button
             asChild

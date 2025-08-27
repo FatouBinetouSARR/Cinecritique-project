@@ -32,13 +32,20 @@ export const Header: React.FC = () => {
     navigate("/");
   };
 
-  // Écouter l'événement de switch mode depuis le modal
+  // couter l'vnement de switch mode depuis le modal
   useEffect(() => {
-    const listener = (e: CustomEvent) => {
+    const onSwitchMode = (e: CustomEvent) => {
       setAuthMode(e.detail);
     };
-    window.addEventListener("switchAuthMode", listener as EventListener);
-    return () => window.removeEventListener("switchAuthMode", listener as EventListener);
+    const onOpenAuth = () => {
+      setAuthModalOpen(true);
+    };
+    window.addEventListener("switchAuthMode", onSwitchMode as unknown as EventListener);
+    window.addEventListener("openAuthModal", onOpenAuth as unknown as EventListener);
+    return () => {
+      window.removeEventListener("switchAuthMode", onSwitchMode as unknown as EventListener);
+      window.removeEventListener("openAuthModal", onOpenAuth as unknown as EventListener);
+    };
   }, []);
 
   const links = [
