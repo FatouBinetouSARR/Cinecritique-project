@@ -19,7 +19,7 @@ export const CriticsPage: React.FC = () => {
   const popularMembers = sortedUsers.slice(0, 5);
 
   return (
-    <div className="min-h-screen text-white">
+    <div className="min-h-screen text-white bg-neutral-950">
       <div className="container mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6">
 
         {/* --- Critiques populaires --- */}

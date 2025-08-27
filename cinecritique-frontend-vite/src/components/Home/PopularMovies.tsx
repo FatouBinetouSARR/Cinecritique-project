@@ -20,7 +20,7 @@ export const PopularMovies: React.FC = () => {
   }, []);
 
   return (
-    <section className="py-12 px-4 md:px-8 relative">
+    <section className="py-12 px-4 md:px-8 relative bg-neutral-950">
       <div className="mb-4">
         <h2 className="text-2xl font-bold text-white font-space-grotesk">
           Films populaires

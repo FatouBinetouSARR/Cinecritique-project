@@ -33,7 +33,7 @@ const useAuth = () => {
 
 interface ReviewsPageProps {
   mode?: "all" | "mine";
-  movieId?: string; // ID TMDb ou interne
+  movieId?: number; // on garde number
 }
 
 export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId }) => {
@@ -54,7 +54,11 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
       try {
         if (mode === "mine") {
           const { data } = await api.get<Review[]>("/reviews/mine");
-          setReviews(movieId ? data.filter(r => r.movieId === movieId) : data);
+          setReviews(
+            movieId
+              ? data.filter(r => r.movieId.toString() === movieId.toString()) // conversion string
+              : data
+          );
         } else {
           if (!movieId) {
             setReviews([]);
@@ -159,8 +163,10 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
         {error && <div className="text-red-400">{error}</div>}
         {loading && <div className="text-gray-400">Chargement…</div>}
 
+        <div className="text-yellow-400 font-semibold">Moyenne des notes : {average.toFixed(1)} ⭐</div>
+
         {movieId && currentUserId && (
-          <div className="bg-gray-800 rounded-lg p-4 shadow">
+          <div className="bg-neutral-800 rounded-lg p-4 shadow">
             <h3 className="text-lg font-semibold mb-2">Ajouter une critique</h3>
             <div className="flex items-center gap-2 mb-2">{renderStarsInput()}</div>
             <textarea
@@ -179,15 +185,13 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
           </div>
         )}
 
-        <div className="text-yellow-400 font-semibold">Moyenne des notes : {average.toFixed(1)} ⭐</div>
-
         {reviews.length === 0 ? (
           <p className="text-gray-400">Aucune critique disponible.</p>
         ) : (
           reviews.map(r => (
             <ReviewCard
               key={r._id}
-              reviewId={r._id}
+              reviewId={r._id.toString()} // conversion en string
               comment={r.comment}
               rating={r.rating}
               userName={r.user?.username || r.user?.email || "Anonyme"}

@@ -23,7 +23,7 @@ export const MoviesGridPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-6 py-8">
+    <div className="min-h-screen bg-neutral-950 text-white px-6 py-8">
       <h1 className="text-3xl font-bold mb-6">
         {type === "popular" && "Films Populaires"}
         {type === "top-rated" && "Les mieux notés"}
@@ -35,15 +35,16 @@ export const MoviesGridPage: React.FC = () => {
           <MoviesCard key={movie.id} movie={movie} />
         ))}
       </div>
+      
       {/* Retour */}
-            <div className="text-center py-6">
-              <Link
-                to="/movies"
-                className="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-400"
-              >
-                ⬅ Retour
-              </Link>
-            </div>
+      <div className="text-center py-6">
+        <Link
+          to="/movies"
+          className="px-4 py-2 bg-yellow-500 text-black rounded hover:bg-yellow-400"
+        >
+          ⬅ Retour
+        </Link>
+      </div>
     </div>
   );
 };

@@ -103,7 +103,7 @@ export const MoviesPage: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-6 py-8 space-y-12">
+    <div className="min-h-screen bg-neutral-950 text-white px-6 py-8 space-y-12">
       <Section
         title="Films populaires cette semaine"
         link="/popular"

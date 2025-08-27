@@ -56,7 +56,7 @@ export const MoviesSearchResults: React.FC = () => {
     );
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white px-4 py-6">
+    <div className="min-h-screen bg-neutral-950 text-white px-4 py-6">
       <h2 className="text-xl font-bold mb-6">Résultats pour "{q}"</h2>
 
       {/* Résultats en grille */}

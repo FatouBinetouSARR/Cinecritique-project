@@ -1,3 +1,4 @@
+// src/components/movies/MoviesId.tsx
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Star, Play, X } from "lucide-react";
@@ -51,7 +52,7 @@ export const MoviesId: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-neutral-950 text-white">
       {/* 🎬 Backdrop */}
       {movie.backdrop_path && (
         <div

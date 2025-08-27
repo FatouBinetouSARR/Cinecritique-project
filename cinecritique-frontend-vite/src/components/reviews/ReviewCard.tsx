@@ -4,7 +4,7 @@ import { Star, Edit, Trash2, Save } from "lucide-react";
 import { Button } from "../../ui/button";
 
 interface ReviewCardProps {
-  reviewId: string;
+  reviewId: string; // maintenant toujours string
   comment: string;
   rating: number;
   userName: string;
@@ -37,7 +37,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
     ));
 
   return (
-    <div className="rounded-lg shadow p-4 hover:shadow-lg transition bg-gray-800">
+    <div className="rounded-lg shadow p-4 hover:shadow-lg transition bg-neutral-700">
       <div>
         <div className="flex justify-between items-start">
           <div>

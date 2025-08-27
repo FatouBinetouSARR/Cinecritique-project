@@ -42,9 +42,9 @@ export const PersonPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-neutral-950 text-white">
       {/* HEADER */}
-      <div className="bg-gray-800 p-6 flex flex-col md:flex-row items-center md:items-start gap-6">
+      <div className="bg-neutral-950 p-6 flex flex-col md:flex-row items-center md:items-start gap-6">
         {person.profile_path ? (
           <img
             src={`https://image.tmdb.org/t/p/w300${person.profile_path}`}
@@ -52,7 +52,7 @@ export const PersonPage: React.FC = () => {
             className="w-48 h-64 object-cover rounded-lg shadow-md"
           />
         ) : (
-          <div className="w-48 h-64 bg-gray-700 rounded-lg flex items-center justify-center text-gray-400">
+          <div className="w-48 h-64 bg-neutral-950 rounded-lg flex items-center justify-center text-gray-400">
             Pas d'image
           </div>
         )}
