@@ -48,7 +48,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode }) =
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gray-900 text-white rounded-xl p-6 sm:p-8 flex flex-col gap-6">
+      <DialogContent className="bg-black border border-secondary rounded-xl shadow-xl animate-fade-in text-white p-8 sm:p-12 flex flex-col gap-1 w-full max-w-md">
         <DialogHeader>
           <DialogTitle className="text-3xl font-bold text-center">
             {mode === "login" ? "Bienvenue !" : "Créer un compte"}

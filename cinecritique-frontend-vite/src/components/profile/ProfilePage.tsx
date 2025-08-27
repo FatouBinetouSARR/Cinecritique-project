@@ -1,4 +1,4 @@
-// src/pages/Account.tsx
+// src/components/profile/ProfilePage.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "../../lib/useAuth";
 import { apiFetch, API_URL } from "../../lib/apiFetch";
@@ -13,7 +13,7 @@ interface ProfileData {
 }
 
 export default function Profile() {
-  const { accessToken, logout } = useAuth();
+  const { accessToken } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -32,7 +32,6 @@ export default function Profile() {
     [accessToken]
   );
 
-  // Charger profil
   useEffect(() => {
     const fetchProfile = async () => {
       setError(null);
@@ -46,8 +45,6 @@ export default function Profile() {
           setProfile(data);
           setFormUsername(data.username || "");
           setFormBio(data.bio || "");
-        } else if (res.status === 401) {
-          await logout();
         } else {
           setError("Impossible de charger le profil.");
         }
@@ -58,7 +55,7 @@ export default function Profile() {
       }
     };
     fetchProfile();
-  }, [authHeader, logout]);
+  }, [authHeader]);
 
   useEffect(() => {
     return () => {
@@ -105,23 +102,11 @@ export default function Profile() {
       const res = await apiFetch("/api/profile", {
         method: "PUT",
         headers: { ...(authHeader || {}), "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formUsername || undefined,
-          bio: formBio || undefined,
-        }),
+        body: JSON.stringify({ username: formUsername || undefined, bio: formBio || undefined }),
       });
-      if (!res.ok) {
-        if (res.status === 401) {
-          await logout();
-          return;
-        }
-        throw new Error("Échec de la mise à jour du profil");
-      }
+      if (!res.ok) throw new Error("Échec de la mise à jour du profil");
 
-      const refreshed = await apiFetch("/api/profile", {
-        method: "GET",
-        headers: authHeader,
-      });
+      const refreshed = await apiFetch("/api/profile", { method: "GET", headers: authHeader });
       const refreshedData: ProfileData = await refreshed.json();
       setProfile(refreshedData);
       setIsEditing(false);
@@ -137,264 +122,144 @@ export default function Profile() {
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-  };
-
-  // ---------- UI helpers (boutons + cartes) ----------
-  const Card: React.FC<{ title?: string; subtitle?: string; right?: React.ReactNode; className?: string; children: React.ReactNode }> = ({
+  const Card: React.FC<{ title?: string; subtitle?: string; children: React.ReactNode }> = ({
     title,
     subtitle,
-    right,
-    className = "",
     children,
   }) => (
-    <section
-      className={`bg-neutral-900/60 border border-neutral-800 rounded-2xl shadow-sm ${className}`}
-    >
-      {(title || subtitle || right) && (
-        <header className="px-5 sm:px-6 py-4 border-b border-neutral-800 flex items-center justify-between">
-          <div>
-            {title && <h3 className="text-base sm:text-lg font-semibold text-neutral-100">{title}</h3>}
-            {subtitle && <p className="text-sm text-neutral-400">{subtitle}</p>}
-          </div>
-          {right}
-        </header>
-      )}
-      <div className="p-5 sm:p-6">{children}</div>
-    </section>
+    <div className="bg-neutral-900/50 border border-neutral-800 rounded-2xl shadow-lg p-6 space-y-4">
+      {title && <h3 className="text-lg font-semibold text-neutral-100">{title}</h3>}
+      {subtitle && <p className="text-sm text-neutral-400">{subtitle}</p>}
+      {children}
+    </div>
   );
 
   const PrimaryButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ className = "", ...props }) => (
     <button
       {...props}
-      className={[
-        "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium",
-        "bg-yellow-500 text-neutral-900 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/40",
-        "disabled:opacity-60 disabled:cursor-not-allowed",
-        className,
-      ].join(" ")}
+      className={`px-5 py-2 rounded-xl font-medium bg-yellow-500 text-neutral-900 hover:bg-yellow-400 transition ${className}`}
     />
   );
 
   const MutedButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ className = "", ...props }) => (
     <button
       {...props}
-      className={[
-        "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium",
-        "bg-neutral-800 text-neutral-200 hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-700/50",
-        className,
-      ].join(" ")}
-    />
-  );
-
-  const LinkButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ className = "", ...props }) => (
-    <button
-      {...props}
-      className={["text-sm text-neutral-400 hover:text-neutral-200 underline-offset-4 hover:underline", className].join(" ")}
+      className={`px-5 py-2 rounded-xl font-medium bg-neutral-800 text-neutral-300 hover:bg-neutral-700 transition ${className}`}
     />
   );
 
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center p-6">
-        <div className="w-full max-w-xl">
-          <div className="animate-pulse space-y-4">
-            <div className="h-6 w-40 bg-neutral-800 rounded"></div>
-            <div className="h-32 bg-neutral-900 rounded-2xl border border-neutral-800"></div>
-            <div className="h-64 bg-neutral-900 rounded-2xl border border-neutral-800"></div>
-          </div>
-          <p className="mt-6 text-center text-neutral-400">Chargement du profil…</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-neutral-950 text-neutral-100 flex items-center justify-center p-6">
-        <div className="w-full max-w-lg space-y-4">
-          <div className="rounded-2xl border border-red-500/30 bg-red-900/20 p-4">
-            <p className="text-red-300">{error}</p>
-          </div>
-          <MutedButton onClick={() => window.location.reload()}>Réessayer</MutedButton>
+        <div className="space-y-4 w-full max-w-lg animate-pulse">
+          <div className="h-6 w-40 bg-neutral-800 rounded"></div>
+          <div className="h-32 bg-neutral-900 rounded-2xl border border-neutral-800"></div>
+          <div className="h-64 bg-neutral-900 rounded-2xl border border-neutral-800"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      {/* Header de page */}
-      <div className="border-b border-neutral-900 bg-neutral-950/60 backdrop-blur supports-[backdrop-filter]:bg-neutral-950/50">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-              Mon compte <span className="align-middle ml-1">⭐</span>
-            </h1>
-            <p className="text-neutral-400 text-sm">Gérez votre profil et vos préférences.</p>
-          </div>
-          <div className="flex gap-2">
-            {!isEditing && (
-              <PrimaryButton
-                onClick={() => {
-                  setIsEditing(true);
-                  setSuccess(null);
-                  setError(null);
-                }}
-              >
-                Modifier le profil
-              </PrimaryButton>
-            )}
-            <MutedButton onClick={handleLogout}>Se déconnecter</MutedButton>
-          </div>
-        </div>
+    <div className="min-h-screen bg-neutral-950 text-neutral-100 p-16 container mx-auto space-y-8">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-1">Mon compte ⭐</h1>
+        <p className="text-neutral-400">Gérez votre profil et vos préférences.</p>
       </div>
 
-      {/* Contenu */}
-      <main className="mx-auto max-w-6xl px-4 sm:px-6 py-8 space-y-8">
-        {/* Profil */}
-        <Card
-          title="Profil utilisateur"
-          subtitle="Informations personnelles et avatar"
-          right={
-            success ? <span className="text-sm text-green-400">{success}</span> : null
-          }
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Résumé */}
-            <aside className="lg:col-span-1">
-              <div className="flex flex-col items-center text-center p-5 rounded-2xl border border-neutral-800 bg-neutral-900">
-                <div className="relative w-28 h-28 rounded-full overflow-hidden ring-2 ring-yellow-500/80 ring-offset-2 ring-offset-neutral-900 mb-3">
-                  <img
-                    src={avatarPreview || profile?.avatarUrl || "/avatar-placeholder.png"}
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
+      {/* Profil */}
+      <Card title="Profil utilisateur" subtitle="Informations personnelles et avatar">
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Avatar */}
+          <div className="flex flex-col items-center lg:w-1/3 text-center space-y-3">
+            <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-yellow-500/60 mb-2 transition-transform hover:scale-105">
+              <img
+                src={avatarPreview || profile?.avatarUrl || "/avatar-placeholder.png"}
+                alt="Avatar"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <h4 className="text-xl font-semibold">{profile?.username || "Utilisateur"}</h4>
+            <p className="text-neutral-400 text-sm">{profile?.bio || "Aucune bio"}</p>
+            <p className="text-neutral-300 text-sm mt-2 break-words">{profile?.email}</p>
+          </div>
+
+          {/* Formulaire */}
+          <div className="flex-1">
+            {isEditing ? (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm text-neutral-400 mb-1">Pseudo</label>
+                  <input
+                    value={formUsername}
+                    onChange={(e) => setFormUsername(e.target.value)}
+                    className="w-full rounded-xl bg-neutral-900 border border-neutral-700 px-3 py-2 focus:ring-2 focus:ring-yellow-500/30 focus:border-yellow-500 outline-none"
+                    placeholder="Votre pseudo"
                   />
                 </div>
-                <h4 className="text-lg font-semibold">{profile?.username || "Utilisateur"}</h4>
-                <p className="text-sm text-neutral-400 mt-1">{profile?.bio || "Aucune bio"}</p>
+                <div>
+                  <label className="block text-sm text-neutral-400 mb-1">Bio</label>
+                  <textarea
+                    value={formBio}
+                    onChange={(e) => setFormBio(e.target.value)}
+                    rows={4}
+                    className="w-full rounded-xl bg-neutral-900 border border-neutral-700 px-3 py-2 focus:ring-2 focus:ring-yellow-500/30 focus:border-yellow-500 outline-none"
+                    placeholder="Parlez de vous…"
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-24 h-24 rounded-full overflow-hidden border border-neutral-700 bg-neutral-800">
+                    <img
+                      src={avatarPreview || profile?.avatarUrl || "/avatar-placeholder.png"}
+                      alt="Aperçu avatar"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleSelectAvatar} />
+                    <PrimaryButton onClick={() => fileInputRef.current?.click()}>Choisir une image</PrimaryButton>
+                    {avatarPreview && (
+                      <MutedButton onClick={() => { if (avatarPreview) URL.revokeObjectURL(avatarPreview); setAvatarPreview(null); setAvatarFile(null); }}>
+                        Retirer
+                      </MutedButton>
+                    )}
+                  </div>
+                </div>
 
-                <div className="text-sm text-neutral-300 mt-4 w-full text-left space-y-2">
-                  <p>
-                    <span className="text-neutral-400">Email</span>
-                    <br />
-                    <span className="font-medium">{profile?.email}</span>
-                  </p>
+                <div className="flex flex-wrap gap-3 mt-4">
+                  <PrimaryButton onClick={handleSave} disabled={saving}>{saving ? "Sauvegarde…" : "Sauvegarder"}</PrimaryButton>
+                  <MutedButton onClick={resetForm}>Réinitialiser</MutedButton>
+                  <MutedButton onClick={() => setIsEditing(false)}>Annuler</MutedButton>
+                </div>
+
+                {error && <p className="text-red-400 mt-2">{error}</p>}
+                {success && <p className="text-green-400 mt-2">{success}</p>}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+                  <p className="text-xs text-neutral-500">Pseudo</p>
+                  <p className="font-medium mt-1">{profile?.username || "—"}</p>
+                </div>
+                <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+                  <p className="text-xs text-neutral-500">Email</p>
+                  <p className="font-medium mt-1">{profile?.email}</p>
+                </div>
+                <div className="sm:col-span-2 bg-neutral-900 border border-neutral-800 rounded-xl p-4">
+                  <p className="text-xs text-neutral-500">Bio</p>
+                  <p className="text-neutral-200 mt-1 whitespace-pre-line">{profile?.bio || "—"}</p>
                 </div>
               </div>
-            </aside>
-
-            {/* Détails + formulaire */}
-            <section className="lg:col-span-2 space-y-6">
-              {isEditing ? (
-                <>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm text-neutral-300 mb-1">Pseudo</label>
-                      <input
-                        type="text"
-                        value={formUsername}
-                        onChange={(e) => setFormUsername(e.target.value)}
-                        className="w-full rounded-xl bg-neutral-900 border border-neutral-700 px-3 py-2 outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/30 placeholder:text-neutral-500"
-                        placeholder="Votre pseudo"
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm text-neutral-300 mb-1">Bio</label>
-                      <textarea
-                        value={formBio}
-                        onChange={(e) => setFormBio(e.target.value)}
-                        rows={4}
-                        className="w-full rounded-xl bg-neutral-900 border border-neutral-700 px-3 py-2 outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/30 placeholder:text-neutral-500"
-                        placeholder="Parlez de vous…"
-                      />
-                    </div>
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm text-neutral-300 mb-2">Photo de profil</label>
-                      <div className="flex items-center gap-4">
-                        <div className="w-20 h-20 rounded-full overflow-hidden border border-neutral-700 bg-neutral-800">
-                          <img
-                            src={avatarPreview || profile?.avatarUrl || "/avatar-placeholder.png"}
-                            alt="Aperçu avatar"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleSelectAvatar}
-                          />
-                          <PrimaryButton type="button" onClick={() => fileInputRef.current?.click()}>
-                            Choisir une image
-                          </PrimaryButton>
-                          {avatarPreview && (
-                            <LinkButton
-                              type="button"
-                              onClick={() => {
-                                if (avatarPreview) URL.revokeObjectURL(avatarPreview);
-                                setAvatarPreview(null);
-                                setAvatarFile(null);
-                              }}
-                            >
-                              Retirer
-                            </LinkButton>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-3">
-                    <PrimaryButton onClick={handleSave} disabled={saving}>
-                      {saving ? "Sauvegarde…" : "Sauvegarder"}
-                    </PrimaryButton>
-                    <MutedButton type="button" onClick={resetForm}>
-                      Réinitialiser
-                    </MutedButton>
-                    <LinkButton type="button" onClick={() => setIsEditing(false)}>
-                      Annuler
-                    </LinkButton>
-                  </div>
-
-                  {error && (
-                    <div className="rounded-xl border border-red-500/30 bg-red-900/20 p-3 text-red-300 text-sm">
-                      {error}
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
-                    <p className="text-xs uppercase tracking-wide text-neutral-500">Pseudo</p>
-                    <p className="mt-1 font-medium">{profile?.username || "—"}</p>
-                  </div>
-                  <div className="p-4 rounded-xl bg-neutral-900 border border-neutral-800">
-                    <p className="text-xs uppercase tracking-wide text-neutral-500">Email</p>
-                    <p className="mt-1 font-medium">{profile?.email}</p>
-                  </div>
-                  <div className="p-4 rounded-xl bg-neutral-900 border border-neutral-800 sm:col-span-2">
-                    <p className="text-xs uppercase tracking-wide text-neutral-500">Bio</p>
-                    <p className="mt-1 text-neutral-200 whitespace-pre-line">{profile?.bio || "—"}</p>
-                  </div>
-                </div>
-              )}
-            </section>
+            )}
           </div>
-        </Card>
+        </div>
+      </Card>
 
-        {/* Mes critiques */}
-        <Card
-          title="Mes critiques"
-          subtitle="Historique de vos avis et notations"
-          right={<span className="text-yellow-400" aria-hidden>★</span>}
-        >
-          <ReviewsPage mode="mine" />
-        </Card>
-      </main>
+      {/* Mes critiques */}
+      <Card title="Mes critiques" subtitle="Historique de vos avis et notations">
+        <ReviewsPage mode="mine" />
+      </Card>
     </div>
   );
 }

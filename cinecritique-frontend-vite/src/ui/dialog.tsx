@@ -17,8 +17,7 @@ export const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) 
       aria-modal="true"
     >
       <div
-        className="relative w-full max-w-md bg-gray-900 rounded-2xl shadow-2xl border border-gray-700
-                   p-6 sm:p-8 overflow-y-auto max-h-[90vh] animate-in fade-in-50 scale-in-95"
+        className="relative bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white rounded-xl shadow-2xl border border-secondary w-full max-w-md p-8 animate-in fade-in-50 zoom-in-95 max-h-[90vh] overflow-y-auto"
       >
         {/* Bouton de fermeture */}
         <button
