@@ -11,7 +11,7 @@ interface ProfileData {
   avatarUrl?: string;
 }
 
-export default function Profile() {
+export default function ProfilePage() {
   const { accessToken, logout } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -397,3 +397,4 @@ export default function Profile() {
     </div>
   );
 }
+

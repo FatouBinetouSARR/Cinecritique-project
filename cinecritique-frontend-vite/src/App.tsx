@@ -7,7 +7,7 @@ import { Layout } from "./layouts/Layout";
 
 // Pages principales
 import { HomePage } from "./components/home/HomePage";
-import Profile from "./components/profile/ProfilePage";
+import ProfilePage from "./components/profile/ProfilePage";
 
 // Pages Films
 import { MoviesPage } from "./components/movies/MoviesPage";
@@ -39,7 +39,7 @@ const App: React.FC = () => {
             path="/profile"
             element={
               <PrivateRoute>
-                <Profile />
+                <ProfilePage />
               </PrivateRoute>
             }
           />
