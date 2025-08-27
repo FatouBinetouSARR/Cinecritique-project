@@ -12,23 +12,21 @@ export const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       role="dialog"
       aria-modal="true"
     >
       <div
-        className="relative bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white 
-                   rounded-xl shadow-2xl border border-secondary w-full max-w-md p-6 sm:p-8    
-                   animate-in fade-in-50 zoom-in-95 
-                   max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-md bg-gray-900 rounded-2xl shadow-2xl border border-gray-700
+                   p-6 sm:p-8 overflow-y-auto max-h-[90vh] animate-in fade-in-50 scale-in-95"
       >
         {/* Bouton de fermeture */}
         <button
-          className="absolute top-3 right-3 text-gray-400 hover:text-white transition"
+          className="absolute top-4 right-4 text-gray-400 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-secondary rounded-full"
           onClick={() => onOpenChange(false)}
           aria-label="Fermer"
         >
-          <X className="w-8 h-8" />
+          <X className="w-6 h-6" />
         </button>
 
         {children}
@@ -50,9 +48,9 @@ export const DialogHeader: React.FC<{ children: React.ReactNode; className?: str
 export const DialogTitle: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
   className = "",
-}) => <h2 className={`text-2xl font-bold tracking-wide ${className}`}>{children}</h2>;
+}) => <h2 className={`text-2xl sm:text-3xl font-bold ${className}`}>{children}</h2>;
 
 export const DialogDescription: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
   className = "",
-}) => <p className={`text-gray-400 text-sm mt-1 ${className}`}>{children}</p>;
+}) => <p className={`text-gray-400 text-sm sm:text-base mt-1 ${className}`}>{children}</p>;
