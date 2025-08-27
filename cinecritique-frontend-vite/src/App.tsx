@@ -7,8 +7,6 @@ import { Layout } from "./layouts/Layout";
 
 // Pages principales
 import { HomePage } from "./components/home/HomePage";
-import Login from "./components/login-register/Login";
-import Register from "./components/login-register/Register";
 import Profile from "./components/profile/ProfilePage";
 
 // Pages Films
@@ -24,7 +22,7 @@ import { CriticsPage } from "./components/membres/MembrePage";
 
 // Auth
 import { AuthProvider } from "./auth/AuthProvider";
-import { PrivateRoute } from "./auth/PrivateRoute"; // à créer pour sécuriser
+import { PrivateRoute } from "./auth/PrivateRoute";
 
 const App: React.FC = () => {
   return (
@@ -35,10 +33,6 @@ const App: React.FC = () => {
         <Routes>
           {/* Accueil */}
           <Route path="/" element={<HomePage />} />
-
-          {/* Auth */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
 
           {/* Profil protégé */}
           <Route

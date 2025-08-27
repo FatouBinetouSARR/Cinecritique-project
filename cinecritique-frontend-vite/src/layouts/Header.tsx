@@ -1,183 +1,114 @@
-// src/components/Header.tsx
-import { useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Search, User, Film, LogOut, Menu, X } from "lucide-react";
-import { Button } from "../ui/button";
-import { Input } from "../ui/Input";
+// cinecritique-frontend-vite/src/components/AuthModal.tsx
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 import { useAuth } from "../lib/useAuth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
-export const Header: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  mode: "login" | "register";   // 👈 repasse en props
+}
 
-  const { isAuthenticated, authLoading, logout } = useAuth();
+export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, mode }) => {
+  const { login, register } = useAuth();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [loading, setLoading] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setMobileMenuOpen(false);
+
+    if (!formData.email || !formData.password) {
+      toast.error("Veuillez remplir tous les champs");
+      return;
+    }
+
+    if (mode === "register" && formData.password !== formData.confirmPassword) {
+      toast.error("Les mots de passe ne correspondent pas");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (mode === "login") {
+        await login(formData.email, formData.password);
+        toast.success("Connexion réussie !");
+      } else {
+        await register(formData.email, formData.password);
+        toast.success("Inscription réussie !");
+      }
+      onClose();
+    } catch {
+      toast.error(mode === "login" ? "Email ou mot de passe incorrect" : "Erreur lors de l'inscription");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const isActive = (path: string) => location.pathname === path;
-
-  const handleLogout = async () => {
-    await logout();
-    navigate("/login");
-  };
-
-  const links = [
-    { label: "Films", path: "/movies", icon: <Film className="h-4 w-4" /> },
-    { label: "Membres", path: "/critics" },
-    ...(isAuthenticated
-      ? [
-          { label: "Mes avis", path: "/my-reviews" },
-          { label: "Profile", path: "/profile", icon: <User className="h-4 w-4" /> },
-        ]
-      : []),
-  ];
-
-  // Fermer le menu mobile lors du changement de route ou de l'état auth
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname, isAuthenticated]);
-
-  if (authLoading) return null; // Évite le flicker avant le refresh
-
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-secondary bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
-          <div className="p-2 rounded-lg bg-secondary/10">
-            <Film className="h-6 w-6 text-secondary" />
-          </div>
-          <span className="text-xl font-bold font-space-grotesk">
-            Cine<span className="text-secondary">Critique</span>
-          </span>
-        </Link>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="bg-black text-white border border-secondary max-w-sm rounded-xl shadow-xl animate-fade-in">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold text-center">
+            {mode === "login" ? "Se connecter" : "Créer un compte"}
+          </DialogTitle>
+        </DialogHeader>
 
-        {/* Navigation desktop */}
-        <nav className="hidden md:flex items-center space-x-6">
-          {links.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className={`text-sm font-medium transition-colors flex items-center gap-1 ${
-                isActive(link.path)
-                  ? "text-secondary font-bold"
-                  : "text-white hover:text-secondary"
-              }`}
-            >
-              {link.icon || null}
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4">
+          <input
+            name="email"
+            type="email"
+            placeholder="Email"
+            value={formData.email}
+            onChange={handleChange}
+            className="border p-2 rounded bg-gray-900 text-white"
+          />
+          <input
+            name="password"
+            type="password"
+            placeholder="Mot de passe"
+            value={formData.password}
+            onChange={handleChange}
+            className="border p-2 rounded bg-gray-900 text-white"
+          />
 
-        {/* Search bar desktop */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-sm mx-4 hidden sm:block">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white h-4 w-4" />
-            <Input
-              type="search"
-              placeholder="Rechercher un film..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border-secondary text-white placeholder:text-white/50 bg-black"
+          {mode === "register" && (
+            <input
+              name="confirmPassword"
+              type="password"
+              placeholder="Confirmez le mot de passe"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              className="border p-2 rounded bg-gray-900 text-white"
             />
-          </div>
-        </form>
-
-        {/* User Menu */}
-        <div className="flex items-center space-x-4">
-          {isAuthenticated ? (
-            <div className="hidden sm:flex items-center space-x-2">
-              <Button onClick={handleLogout}>
-                <LogOut className="h-4 w-4 mr-1" /> Déconnexion
-              </Button>
-            </div>
-          ) : (
-            <div className="hidden sm:flex items-center space-x-2">
-              <Button asChild variant="ghost">
-                <Link to="/login">Se connecter</Link>
-              </Button>
-              <Button asChild>
-                <Link to="/register">S'inscrire</Link>
-              </Button>
-            </div>
           )}
 
-          {/* Mobile menu button */}
-          <Button
-            variant="ghost"
-            className="md:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-secondary text-black py-2 px-4 rounded flex items-center justify-center hover:bg-secondary/80 transition"
           >
-            {mobileMenuOpen ? <X className="h-6 w-6 text-white" /> : <Menu className="h-6 w-6 text-white" />}
-          </Button>
-        </div>
-      </div>
+            {loading ? <Loader2 className="animate-spin w-5 h-5" /> : (mode === "login" ? "Se connecter" : "S'inscrire")}
+          </button>
+        </form>
 
-      {/* Mobile menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-black/95 backdrop-blur border-t border-secondary">
-          <form onSubmit={handleSearch} className="p-4 flex items-center space-x-2">
-            <Input
-              type="search"
-              placeholder="Rechercher..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 border-secondary text-white placeholder:text-white/50 bg-black"
-            />
-            <Button type="submit">Go</Button>
-          </form>
-          <nav className="flex flex-col space-y-2 p-4">
-            {links.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`text-white px-2 py-1 rounded hover:bg-secondary/20 ${
-                  isActive(link.path) ? "text-secondary font-bold" : ""
-                }`}
-              >
-                {link.icon || null} {link.label}
-              </Link>
-            ))}
-            {isAuthenticated ? (
-              <div className="flex flex-col space-y-2 mt-2">
-                <button
-                  onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
-                  className="text-left text-white px-2 py-1 rounded hover:bg-secondary/20"
-                >
-                  Déconnexion
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col space-y-2 mt-2">
-                <Link
-                  to="/login"
-                  className="text-white px-2 py-1 rounded hover:bg-secondary/20"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Se connecter
-                </Link>
-                <Link
-                  to="/register"
-                  className="text-white px-2 py-1 rounded hover:bg-secondary/20"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  S'inscrire
-                </Link>
-              </div>
-            )}
-          </nav>
-        </div>
-      )}
-    </header>
+        {/* Switch mode */}
+        <p className="mt-4 text-center text-sm text-gray-400">
+          {mode === "login" ? (
+            <>Pas encore de compte ? <span className="text-secondary cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent("switchAuthMode", { detail: "register" }))}>Inscrivez-vous</span></>
+          ) : (
+            <>Déjà inscrit ? <span className="text-secondary cursor-pointer" onClick={() => window.dispatchEvent(new CustomEvent("switchAuthMode", { detail: "login" }))}>Connectez-vous</span></>
+          )}
+        </p>
+      </DialogContent>
+    </Dialog>
   );
 };
