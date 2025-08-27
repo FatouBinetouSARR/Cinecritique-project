@@ -8,7 +8,9 @@ dotenv.config();
 const mongoose = require("mongoose");
 const User = require("./models/User");
 const Review = require("./models/Review"); // ensure model is registered so collection exists
-
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +22,13 @@ app.use(cors({ origin: FRONTEND_ORIGIN, credentials: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+// Static serving for uploaded files
+const uploadsRoot = path.join(__dirname, "uploads");
+const avatarsDir = path.join(uploadsRoot, "avatars");
+if (!fs.existsSync(uploadsRoot)) fs.mkdirSync(uploadsRoot);
+if (!fs.existsSync(avatarsDir)) fs.mkdirSync(avatarsDir);
+app.use("/uploads", express.static(uploadsRoot));
+
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || "dev_access_secret";
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "dev_refresh_secret";
 const ACCESS_TOKEN_EXPIRES_IN = process.env.ACCESS_TOKEN_EXPIRES_IN || "15m";
@@ -27,7 +36,6 @@ const REFRESH_TOKEN_EXPIRES_IN = process.env.REFRESH_TOKEN_EXPIRES_IN || "7d";
 
 const reviewRoutes = require("./routes/reviewRoutes.js");
 app.use("/api", reviewRoutes);
-
 
 const refreshTokensStore = new Map();
 
@@ -185,6 +193,55 @@ app.get("/api/profile", authenticateAccessToken, async (req, res) => {
   const user = await User.findById(req.userId).select("-passwordHash");
   if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
   res.status(200).json(user);
+});
+
+// Mise à jour du profil (username, bio)
+app.put("/api/profile", authenticateAccessToken, async (req, res) => {
+  try {
+    const { username, bio } = req.body || {};
+    const update = {};
+    if (typeof username === "string") update.username = username;
+    if (typeof bio === "string") update.bio = bio;
+
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      { $set: update },
+      { new: true, select: "-passwordHash" }
+    );
+    if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
+    res.status(200).json(user);
+  } catch (e) {
+    res.status(500).json({ message: "Erreur lors de la mise à jour du profil" });
+  }
+});
+
+// Configuration Multer pour avatar
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, avatarsDir),
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname) || ".png";
+    const base = path.basename(file.originalname, ext).replace(/[^a-z0-9_-]/gi, "").slice(0, 32) || "avatar";
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `${base}-${unique}${ext}`);
+  },
+});
+const upload = multer({ storage });
+
+// Upload d'avatar
+app.put("/api/profile/avatar", authenticateAccessToken, upload.single("avatar"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "Aucun fichier fourni" });
+    const relativeUrl = `/uploads/avatars/${req.file.filename}`;
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      { $set: { avatarUrl: relativeUrl } },
+      { new: true, select: "-passwordHash" }
+    );
+    if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
+    res.status(200).json({ avatarUrl: relativeUrl, user });
+  } catch (e) {
+    res.status(500).json({ message: "Erreur lors du téléversement de l'avatar" });
+  }
 });
 
 // Rafraîchissement du token
