@@ -11,6 +11,58 @@ interface ProfileData {
   avatarUrl?: string;
 }
 
+// ---------- UI helpers (moved out of component to preserve focus) ----------
+const Card: React.FC<{
+  title?: string;
+  subtitle?: string;
+  right?: React.ReactNode;
+  className?: string;
+  children: React.ReactNode;
+}> = ({ title, subtitle, right, className = "", children }) => (
+  <section className={`bg-neutral-900/60 border border-neutral-800 rounded-2xl shadow-sm ${className}`}>
+    {(title || subtitle || right) && (
+      <header className="px-5 sm:px-6 py-4 border-b border-neutral-800 flex items-center justify-between">
+        <div>
+          {title && <h3 className="text-base sm:text-lg font-semibold text-neutral-100">{title}</h3>}
+          {subtitle && <p className="text-sm text-neutral-400">{subtitle}</p>}
+        </div>
+        {right}
+      </header>
+    )}
+    <div className="p-5 sm:p-6">{children}</div>
+  </section>
+);
+
+const PrimaryButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ className = "", ...props }) => (
+  <button
+    {...props}
+    className={[
+      "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium",
+      "bg-yellow-500 text-neutral-900 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/40",
+      "disabled:opacity-60 disabled:cursor-not-allowed",
+      className,
+    ].join(" ")}
+  />
+);
+
+const MutedButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ className = "", ...props }) => (
+  <button
+    {...props}
+    className={[
+      "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium",
+      "bg-neutral-800 text-neutral-200 hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-700/50",
+      className,
+    ].join(" ")}
+  />
+);
+
+const LinkButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ className = "", ...props }) => (
+  <button
+    {...props}
+    className={["text-sm text-neutral-400 hover:text-neutral-200 underline-offset-4 hover:underline", className].join(" ")}
+  />
+);
+
 export default function ProfilePage() {
   const { accessToken, logout } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
@@ -140,59 +192,7 @@ export default function ProfilePage() {
     await logout();
   };
 
-  // ---------- UI helpers (boutons + cartes) ----------
-  const Card: React.FC<{ title?: string; subtitle?: string; right?: React.ReactNode; className?: string; children: React.ReactNode }> = ({
-    title,
-    subtitle,
-    right,
-    className = "",
-    children,
-  }) => (
-    <section
-      className={`bg-neutral-900/60 border border-neutral-800 rounded-2xl shadow-sm ${className}`}
-    >
-      {(title || subtitle || right) && (
-        <header className="px-5 sm:px-6 py-4 border-b border-neutral-800 flex items-center justify-between">
-          <div>
-            {title && <h3 className="text-base sm:text-lg font-semibold text-neutral-100">{title}</h3>}
-            {subtitle && <p className="text-sm text-neutral-400">{subtitle}</p>}
-          </div>
-          {right}
-        </header>
-      )}
-      <div className="p-5 sm:p-6">{children}</div>
-    </section>
-  );
-
-  const PrimaryButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ className = "", ...props }) => (
-    <button
-      {...props}
-      className={[
-        "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium",
-        "bg-yellow-500 text-neutral-900 hover:bg-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/40",
-        "disabled:opacity-60 disabled:cursor-not-allowed",
-        className,
-      ].join(" ")}
-    />
-  );
-
-  const MutedButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ className = "", ...props }) => (
-    <button
-      {...props}
-      className={[
-        "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium",
-        "bg-neutral-800 text-neutral-200 hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-neutral-700/50",
-        className,
-      ].join(" ")}
-    />
-  );
-
-  const LinkButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({ className = "", ...props }) => (
-    <button
-      {...props}
-      className={["text-sm text-neutral-400 hover:text-neutral-200 underline-offset-4 hover:underline", className].join(" ")}
-    />
-  );
+  // UI helpers moved above to prevent remounts on each render
 
   if (loading) {
     return (
