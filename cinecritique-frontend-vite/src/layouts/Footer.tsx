@@ -56,18 +56,13 @@ export function Footer() {
                   S’inscrire
                 </Link>
               </li>
-              <li>
-                <Link to="/my-reviews" className="text-muted-foreground hover:text-blue-500 transition-colors">
-                  Mes Critiques
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-border mt-8 pt-6 text-center">
           <p className="text-muted-foreground text-sm">
-            © 2024 CineCritique. Construit avec passion pour le cinéma.
+            2024 CineCritique. Construit avec passion pour le cinéma.
           </p>
         </div>
       </div>

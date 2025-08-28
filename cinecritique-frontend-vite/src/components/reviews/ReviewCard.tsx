@@ -1,5 +1,6 @@
 // src/components/reviews/ReviewCard.tsx
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { Star, Edit, Trash2, Save, X } from "lucide-react";
 import { Button } from "../../ui/button";
 
@@ -10,6 +11,8 @@ interface ReviewCardProps {
   userName: string;
   likes?: number;
   isOwner?: boolean;
+  movieId?: string | number;
+  movieTitle?: string;
   onEdit?: (id: string, updatedText: string, updatedRating: number) => void;
   onDelete?: (id: string) => void;
 }
@@ -23,6 +26,8 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   isOwner = false,
   onEdit,
   onDelete,
+  movieId,
+  movieTitle,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editComment, setEditComment] = useState(comment);
@@ -45,7 +50,19 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
       <div className="flex justify-between items-start gap-4">
         {/* Contenu principal */}
         <div className="flex-1">
-          <p className="text-sm text-neutral-400 mb-1">{userName}</p>
+          {/* Titre du film si disponible */}
+          {movieTitle && movieId !== undefined && (
+            <div className="mb-1">
+              <Link
+                to={`/movies/${movieId}`}
+                className="text-sm font-semibold text-white hover:text-yellow-400 transition-colors"
+              >
+                {movieTitle}
+              </Link>
+            </div>
+          )}
+
+          <p className="text-xs text-neutral-400 mb-1">{userName}</p>
 
           {isEditing ? (
             <>

@@ -14,6 +14,7 @@ import { MoviesPage } from "./components/movies/MoviesPage";
 import { MoviesGridPage } from "./components/movies/MoviesGridPage";
 import { MoviesSearchResults } from "./components/movies/MoviesSearchResults";
 import { MoviesId } from "./components/movies/MoviesId";
+import { TopRatedPage } from "./components/movies/TopRatedPage";
 
 // Pages Personnes / Critiques
 import { PersonPage } from "./components/acteurs/ActeursPage";
@@ -51,17 +52,10 @@ const App: React.FC = () => {
           <Route path="/movies" element={<MoviesPage />} />
           <Route path="/movies/:id" element={<MoviesId />} />
           <Route path="/search" element={<MoviesSearchResults />} />
+          <Route path="/top-rated" element={<TopRatedPage />} />
           <Route path="/:type" element={<MoviesGridPage />} />
 
           {/* Critiques */}
-          <Route
-            path="/my-reviews"
-            element={
-              <PrivateRoute>
-                <ReviewsPage />
-              </PrivateRoute>
-            }
-          />
           <Route path="/reviews" element={<ReviewsPage />} />
           <Route path="/critics" element={<CriticsPage />} />
 

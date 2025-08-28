@@ -45,8 +45,9 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
   const [newReview, setNewReview] = useState("");
   const [rating, setRating] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [titles, setTitles] = useState<Record<string, string>>({});
 
-  // 🔄 Charger les critiques
+  // Charger les critiques
   useEffect(() => {
     const fetchReviews = async () => {
       setLoading(true);
@@ -77,7 +78,29 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
     fetchReviews();
   }, [mode, movieId]);
 
-  // ⭐ Ajouter une critique
+  // Charger les titres TMDB pour les critiques personnelles sans movieId précis
+  useEffect(() => {
+    const loadTitles = async () => {
+      if (mode !== "mine" || movieId || reviews.length === 0) return;
+      const API_KEY = import.meta.env.VITE_TMDB_API_KEY as string;
+      const ids = Array.from(new Set(reviews.map(r => r.movieId.toString())));
+      const next: Record<string, string> = {};
+      for (const id of ids) {
+        try {
+          const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&language=fr-FR`);
+          if (!res.ok) continue;
+          const data = await res.json();
+          next[id] = data.title || `Film #${id}`;
+        } catch {
+          // ignore
+        }
+      }
+      setTitles(prev => ({ ...prev, ...next }));
+    };
+    loadTitles();
+  }, [mode, movieId, reviews]);
+
+  // Ajouter une critique
   const handleAddReview = async () => {
     if (!movieId || !newReview.trim() || rating === 0) return;
     try {
@@ -94,7 +117,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
     }
   };
 
-  // ❌ Supprimer
+  // Supprimer
   const handleDeleteReview = async (id: string) => {
     try {
       const found = reviews.find(r => r._id === id);
@@ -107,7 +130,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
     }
   };
 
-  // ✏️ Modifier
+  // Modifier
   const handleEditReview = async (id: string, updatedText: string, updatedRating: number) => {
     try {
       const found = reviews.find(r => r._id === id);
@@ -199,6 +222,8 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
               isOwner={r.user?._id === currentUserId}
               onEdit={handleEditReview}
               onDelete={handleDeleteReview}
+              movieId={r.movieId}
+              movieTitle={titles[r.movieId.toString()]}
             />
           ))
         )}
