@@ -56,7 +56,14 @@ const App: React.FC = () => {
           <Route path="/:type" element={<MoviesGridPage />} />
 
           {/* Critiques */}
-          <Route path="/reviews" element={<ReviewsPage />} />
+          <Route 
+            path="/reviews" 
+            element={
+              <PrivateRoute>
+                <ReviewsPage mode="mine" />
+              </PrivateRoute>
+            } 
+          />
           <Route path="/critics" element={<CriticsPage />} />
 
           {/* 404 */}

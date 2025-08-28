@@ -53,6 +53,7 @@ export const Header: React.FC = () => {
     { label: "Membres", path: "/critics" },
     ...(isAuthenticated
       ? [
+          { label: "Mes avis", path: "/reviews", icon: <span className="h-4 w-4">📝</span> },
           { label: "Profile", path: "/profile", icon: <User className="h-4 w-4" /> },
         ]
       : []),
