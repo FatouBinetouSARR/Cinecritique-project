@@ -4,7 +4,7 @@
   "description": "CineCritique API server",
   "main": "server.js",
   "scripts": {
-    "dev": "nodem server.js",
+    "dev": "node server.js",
     "start": "node server.js"
   },
   "keywords": [],
