@@ -103,10 +103,70 @@ mongoose
   .then(() => console.log("✅ Connecté à MongoDB Atlas"))
   .catch((err) => console.error("❌ Erreur MongoDB :", err));
 
+// --- Middleware d'authentification ---
+const authenticate = async (req, res, next) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Token d\'accès manquant ou invalide' });
+    }
+    
+    const token = authHeader.split(' ')[1];
+    const payload = jwt.verify(token, JWT_ACCESS_SECRET);
+    
+    const user = await User.findById(payload.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    
+    req.user = user;
+    next();
+  } catch (err) {
+    console.error('Erreur d\'authentification :', err);
+    return res.status(401).json({ message: 'Session expirée ou invalide' });
+  }
+};
+
 // --- Routes ---
 app.get("/", (_req, res) =>
   res.send("Bienvenue sur l'API CineCritique 🎬")
 );
+
+// Get current user profile
+app.get("/api/profile", authenticate, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-passwordHash');
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+    res.status(200).json(user);
+  } catch (err) {
+    console.error('Erreur lors de la récupération du profil :', err);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// Update user profile
+app.put("/api/profile", authenticate, async (req, res) => {
+  try {
+    const { username, bio } = req.body;
+    const updates = {};
+    
+    if (username !== undefined) updates.username = username;
+    if (bio !== undefined) updates.bio = bio;
+    
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select('-passwordHash');
+    
+    res.status(200).json(user);
+  } catch (err) {
+    console.error('Erreur lors de la mise à jour du profil :', err);
+    res.status(500).json({ message: 'Erreur lors de la mise à jour du profil' });
+  }
+});
 
 // Register
 app.post("/api/auth/register", async (req, res) => {

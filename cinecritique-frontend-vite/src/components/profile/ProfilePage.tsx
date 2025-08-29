@@ -92,27 +92,36 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       setError(null);
+      setLoading(true);
       try {
         const res = await apiFetch("/api/profile", {
           method: "GET",
           headers: authHeader,
         });
-        if (res.ok) {
-          const data: ProfileData = await res.json();
-          setProfile(data);
-          setFormUsername(data.username || "");
-          setFormBio(data.bio || "");
-        } else if (res.status === 401) {
-          await logout();
-        } else {
-          setError("Impossible de charger le profil.");
+        
+        if (!res.ok) {
+          if (res.status === 401) {
+            await logout();
+            return;
+          }
+          
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.message || "Erreur lors du chargement du profil");
         }
-      } catch {
-        setError("Erreur de connexion au serveur.");
+        
+        const data: ProfileData = await res.json();
+        setProfile(data);
+        setFormUsername(data.username || "");
+        setFormBio(data.bio || "");
+        
+      } catch (error) {
+        console.error("Erreur lors du chargement du profil:", error);
+        setError(error instanceof Error ? error.message : "Erreur de connexion au serveur");
       } finally {
         setLoading(false);
       }
     };
+    
     fetchProfile();
   }, [authHeader, logout]);
 

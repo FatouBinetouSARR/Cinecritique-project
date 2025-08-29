@@ -5,7 +5,16 @@ import { apiFetch } from "../lib/apiFetch";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [accessToken, _setAccessToken] = useState<string | null>(null);
+  
+  // Wrapper pour mettre à jour à la fois l'état local et le token dans apiFetch
+  const setAccessToken = useCallback((token: string | null) => {
+    _setAccessToken(token);
+    // Mettre à jour le token dans le module apiFetch
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('accessToken', token || '');
+    }
+  }, []);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const refreshInProgressRef = useRef<Promise<string | null> | null>(null);
 
@@ -37,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     })();
     return refreshInProgressRef.current;
-  }, []);
+  }, [setAccessToken, setUser]);
 
   // 🔑 Login
   const login = useCallback(async (email: string, password: string) => {
@@ -73,15 +82,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // 🚪 Logout
   const logout = useCallback(async () => {
-    await apiFetch("/api/auth/logout", { method: "POST" });
-    setUser(null);
-    setAccessToken(null);
+    try {
+      await apiFetch("/api/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    } finally {
+      setUser(null);
+      setAccessToken(null);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+    }
+  }, [setUser, setAccessToken]);
 
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-  }, []);
-
-  // 🏁 Initialisation au montage
+  // Initialisation au montage
   useEffect(() => {
     (async () => {
       try {
@@ -98,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthLoading(false);
       }
     })();
-  }, [performRefresh]);
+  }, [performRefresh, setAccessToken]);
 
   const value = useMemo(
     () => ({
