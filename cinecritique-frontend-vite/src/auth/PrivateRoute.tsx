@@ -1,7 +1,7 @@
 // src/auth/PrivateRoute.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../lib/useAuth"; // chemin relatif vers ton useAuth.ts
+import { useAuth } from "../lib/useAuth"; // chemin relatif vers ton hook
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -9,6 +9,13 @@ interface PrivateRouteProps {
 
 export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
   const { isAuthenticated, authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      window.dispatchEvent(new CustomEvent("switchAuthMode", { detail: "login" }));
+      window.dispatchEvent(new Event("openAuthModal"));
+    }
+  }, [authLoading, isAuthenticated]);
 
   if (authLoading) {
     return (
@@ -18,11 +25,11 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
     );
   }
 
-  // Si l'utilisateur n'est pas connecté, redirige vers la page de login
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  
+    // Rediriger vers "/" ET ouvrir le modal
+    return <Navigate to="/" replace />;
   }
 
-  // Sinon, affiche les enfants (la page protégée)
   return <>{children}</>;
 };
