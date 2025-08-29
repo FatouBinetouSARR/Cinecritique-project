@@ -5,6 +5,6 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
   return fetch(`${API_URL}${path}`, {
     ...options,
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-    credentials: "include",
+    credentials: "include", // ✅ pour envoyer les cookies cross-site
   });
 }
