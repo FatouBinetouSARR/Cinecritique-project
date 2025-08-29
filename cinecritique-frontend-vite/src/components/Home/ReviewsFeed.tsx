@@ -4,10 +4,17 @@ import { Link } from "react-router-dom";
 import { ReviewCard } from "../reviews/ReviewCard";
 import { dataUserReviews } from "../../data/dataReviews";
 import { dataUsers } from "../../data/dataUser";
-import { UserCard } from "../profile/ProfileCard";
+
+// Données des films (à remplacer par un appel API dans une vraie application)
+const moviesData = [
+  { id: 1, title: "Oppenheimer" },
+  { id: 2, title: "Barbie" },
+  { id: 3, title: "Dune: Deuxième Partie" },
+  { id: 5, title: "The Batman" },
+  { id: 7, title: "Avatar: La Voie de l'Eau" },
+];
 
 export const ReviewsFeed: React.FC = () => {
-  const currentUserId = 1; // ID de l'utilisateur connecté (à adapter selon ton contexte)
 
   return (
     <section className="py-12 px-4 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-8 bg-neutral-950">
@@ -23,47 +30,29 @@ export const ReviewsFeed: React.FC = () => {
           </Link>
         </div>
 
-        {dataUserReviews.map((r) => {
-          const user = dataUsers.find((u) => u.id === r.userId);
+        {dataUserReviews.map((review) => {
+          const user = dataUsers.find((u) => u.id === review.userId);
+          const movie = moviesData.find((m) => m.id === review.movieId);
+          
           return (
-            <Link key={r.id} to={`/movies/${r.movieId}`}>
+            <div key={review.id} className="mb-6">
               <ReviewCard
-                reviewId={r.id.toString()}
-                comment={r.comment}
-                rating={r.rating}
+                reviewId={review.id.toString()}
+                comment={review.comment}
+                rating={review.rating}
                 userName={user?.name || "Utilisateur inconnu"}
-                likes={r.likes}
-                isOwner={r.userId === currentUserId}
+                likes={review.likes}
+                movieId={review.movieId}
+                movieTitle={movie?.title || `Film #${review.movieId}`}
               />
-            </Link>
+            </div>
           );
         })}
       </div>
 
-      {/* Sidebar : Utilisateurs populaires */}
+      {/* Sidebar : Espace pour d'autres fonctionnalités */}
       <aside className="lg:col-span-1">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-white">Critiques populaires</h2>
-          <Link
-            to="/critics"
-            className="text-yellow-400 hover:underline font-medium"
-          >
-            Plus →
-          </Link>
-        </div>
-
-        <div className="flex flex-col gap-6">
-          {dataUsers.map((critic) => (
-            <UserCard
-              key={critic.id}
-              id={critic.id}
-              name={critic.name}
-              avatar={critic.avatar}
-              followers={critic.followers}
-              bio={critic.bio}
-            />
-          ))}
-        </div>
+        {/* Vous pouvez ajouter d'autres fonctionnalités ici plus tard */}
       </aside>
     </section>
   );
