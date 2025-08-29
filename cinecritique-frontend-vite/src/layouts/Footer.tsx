@@ -81,7 +81,7 @@ export function Footer() {
 
         <div className="border-t border-border mt-8 pt-6 text-center">
           <p className="text-muted-foreground text-sm">
-            © 2024 CineCritique. Construit avec passion pour le cinéma.
+            2024 CineCritique. Construit avec passion pour le cinéma.
           </p>
         </div>
       </div>

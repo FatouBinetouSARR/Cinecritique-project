@@ -83,6 +83,11 @@ export default function ProfilePage() {
     [accessToken]
   );
 
+  // Fallback image (1x1 transparent GIF) to avoid 404s when no avatar
+  const PLACEHOLDER =
+    "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
+  const resolveAvatarSrc = (u?: string | null) => (u ? `${API_URL}${u}` : PLACEHOLDER);
+
   // Charger profil
   useEffect(() => {
     const fetchProfile = async () => {
@@ -266,7 +271,7 @@ export default function ProfilePage() {
               <div className="flex flex-col items-center text-center p-5 rounded-2xl border border-neutral-800 bg-neutral-900">
                 <div className="relative w-28 h-28 rounded-full overflow-hidden ring-2 ring-yellow-500/80 ring-offset-2 ring-offset-neutral-900 mb-3">
                   <img
-                    src={avatarPreview || profile?.avatarUrl || "/avatar-placeholder.png"}
+                    src={avatarPreview || resolveAvatarSrc(profile?.avatarUrl)}
                     alt="Avatar"
                     className="w-full h-full object-cover"
                   />
@@ -314,7 +319,7 @@ export default function ProfilePage() {
                       <div className="flex items-center gap-4">
                         <div className="w-20 h-20 rounded-full overflow-hidden border border-neutral-700 bg-neutral-800">
                           <img
-                            src={avatarPreview || profile?.avatarUrl || "/avatar-placeholder.png"}
+                            src={avatarPreview || resolveAvatarSrc(profile?.avatarUrl)}
                             alt="Aperçu avatar"
                             className="w-full h-full object-cover"
                           />
