@@ -6,7 +6,7 @@ import { Toaster } from "react-hot-toast";
 import { Layout } from "./layouts/Layout";
 
 // Pages principales
-import { HomePage } from "./components/Home/HomePage";
+import { HomePage } from "./components/home/HomePage";
 import ProfilePage from "./components/profile/ProfilePage";
 
 // Pages Films
