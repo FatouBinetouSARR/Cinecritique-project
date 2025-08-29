@@ -15,7 +15,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
-              Découvrez, critiquez et notez des films avec notre communauté passionnée de cinéphiles. 
+              Découvrez, critiquez et notez des films avec notre communauté passionnée de cinéphiles.
               Partagez vos avis et trouvez votre prochain film préféré.
             </p>
           </div>
@@ -25,13 +25,13 @@ export function Footer() {
             <h3 className="font-semibold text-foreground mb-4">Explorer</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-blue-500 transition-colors">
+                <Link to="/popular" className="text-muted-foreground hover:text-blue-500 transition-colors">
                   Films Populaires
                 </Link>
               </li>
               <li>
                 <Link to="/top-rated" className="text-muted-foreground hover:text-blue-500 transition-colors">
-                   Les Mieux Notés
+                  Les Mieux Notés
                 </Link>
               </li>
               <li>
@@ -47,15 +47,29 @@ export function Footer() {
             <h3 className="font-semibold text-foreground mb-4">Compte</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/login" className="text-muted-foreground hover:text-blue-500 transition-colors">
+                <button
+                  className="text-muted-foreground hover:text-blue-500 transition-colors"
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent("switchAuthMode", { detail: "login" }));
+                    window.dispatchEvent(new Event("openAuthModal"));
+                  }}
+                >
                   Se Connecter
-                </Link>
+                </button>
               </li>
+
               <li>
-                <Link to="/register" className="text-muted-foreground hover:text-blue-500 transition-colors">
+                <button
+                  className="text-muted-foreground hover:text-blue-500 transition-colors"
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent("switchAuthMode", { detail: "register" }));
+                    window.dispatchEvent(new Event("openAuthModal"));
+                  }}
+                >
                   S’inscrire
-                </Link>
+                </button>
               </li>
+
               <li>
                 <Link to="/my-reviews" className="text-muted-foreground hover:text-blue-500 transition-colors">
                   Mes Critiques
