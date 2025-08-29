@@ -44,6 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const res = await apiFetch("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
+      credentials: "include" // 🔑 pour que le cookie soit envoyé
     });
     if (!res.ok) throw new Error("Identifiants invalides");
     const data = await res.json();
@@ -61,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const res = await apiFetch("/api/auth/register", {
       method: "POST",
       body: JSON.stringify({ email, password }),
+      credentials: "include" // 🔑 pour que le cookie soit envoyé
     });
     if (!res.ok) throw new Error("Erreur lors de l'inscription");
     const data = await res.json();
