@@ -23,7 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setAccessToken(data.accessToken);
           setUser({ id: data.user.id, email: data.user.email });
 
-          // ✅ Persist in localStorage
+          // ✅ Persist
           localStorage.setItem("accessToken", data.accessToken);
           localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
 
@@ -44,7 +44,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const res = await apiFetch("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
-      credentials: "include" // 🔑 pour que le cookie soit envoyé
     });
     if (!res.ok) throw new Error("Identifiants invalides");
     const data = await res.json();
@@ -52,7 +51,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser({ id: data.user.id, email: data.user.email });
     setAccessToken(data.accessToken);
 
-    // ✅ Persist
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
   }, []);
@@ -62,7 +60,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const res = await apiFetch("/api/auth/register", {
       method: "POST",
       body: JSON.stringify({ email, password }),
-      credentials: "include" // 🔑 pour que le cookie soit envoyé
     });
     if (!res.ok) throw new Error("Erreur lors de l'inscription");
     const data = await res.json();
@@ -70,7 +67,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser({ id: data.user.id, email: data.user.email });
     setAccessToken(data.accessToken);
 
-    // ✅ Persist
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
   }, []);
@@ -81,7 +77,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setAccessToken(null);
 
-    // ✅ Clear localStorage
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
   }, []);
@@ -90,7 +85,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     (async () => {
       try {
-        // 1. Charger depuis localStorage
         const savedToken = localStorage.getItem("accessToken");
         const savedUser = localStorage.getItem("user");
 
@@ -98,7 +92,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setAccessToken(savedToken);
           setUser(JSON.parse(savedUser));
         } else {
-          // 2. Sinon → tenter un refresh avec cookie httpOnly
           await performRefresh();
         }
       } finally {
