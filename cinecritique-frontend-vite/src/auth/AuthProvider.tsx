@@ -1,4 +1,3 @@
-// cinecritique-frontend-vite/src/auth/AuthProvider.tsx
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { AuthContext } from "../lib/AuthContext";
 import type { User } from "../lib/authTypes";
@@ -6,7 +5,16 @@ import { apiFetch } from "../lib/apiFetch";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [accessToken, _setAccessToken] = useState<string | null>(null);
+  
+  // Wrapper pour mettre à jour à la fois l'état local et le token dans apiFetch
+  const setAccessToken = useCallback((token: string | null) => {
+    _setAccessToken(token);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('accessToken', token || '');
+    }
+  }, []);
+
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const refreshInProgressRef = useRef<Promise<string | null> | null>(null);
 
@@ -39,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     })();
     return refreshInProgressRef.current;
-  }, []);
+  }, [setAccessToken, setUser]);
 
   const login = useCallback(async (email: string, password: string) => {
     console.log("🔑 Login called:", email);
@@ -65,19 +73,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAccessToken(data.accessToken);
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
-    setAccessToken(data.accessToken); // au login, register, refresh, logout
-
   }, []);
 
   const logout = useCallback(async () => {
     console.log("🚪 Logout called");
-    await apiFetch("/api/auth/logout", { method: "POST" });
-    setUser(null);
-    setAccessToken(null);
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
-  }, []);
+    try {
+      await apiFetch("/api/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    } finally {
+      setUser(null);
+      setAccessToken(null);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
+    }
+  }, [setUser, setAccessToken]);
 
+  // Initialisation au montage
   useEffect(() => {
     (async () => {
       try {
@@ -94,9 +106,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setAuthLoading(false);
       }
     })();
-  }, [performRefresh]);
+  }, [performRefresh, setAccessToken]);
 
-  const value = useMemo(() => ({ user, accessToken, isAuthenticated, authLoading, login, register, logout }),
+  const value = useMemo(
+    () => ({ user, accessToken, isAuthenticated, authLoading, login, register, logout }),
     [user, accessToken, isAuthenticated, authLoading, login, register, logout]
   );
 

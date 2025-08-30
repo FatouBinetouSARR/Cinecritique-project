@@ -1,17 +1,19 @@
 // src/components/reviews/ReviewCard.tsx
-import React, { useState } from "react";
-import { Star, Edit, Trash2, Save, X } from "lucide-react";
-import { Button } from "../../ui/button";
+import React, { useState, useEffect, useContext } from "react";
+import { Link } from "react-router-dom";
+import { Star, ThumbsUp } from "lucide-react";
+import { AuthContext } from "../../lib/AuthContext";
+import { toast } from "react-hot-toast";
+import axios from 'axios';
 
 interface ReviewCardProps {
-  reviewId: string; // toujours string
+  reviewId: string;
   comment: string;
   rating: number;
   userName: string;
   likes?: number;
-  isOwner?: boolean;
-  onEdit?: (id: string, updatedText: string, updatedRating: number) => void;
-  onDelete?: (id: string) => void;
+  movieId?: string | number;
+  movieTitle?: string;
 }
 
 export const ReviewCard: React.FC<ReviewCardProps> = ({
@@ -19,22 +21,75 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
   comment,
   rating,
   userName,
-  likes = 0,
-  isOwner = false,
-  onEdit,
-  onDelete,
+  likes: initialLikes = 0,
+  movieId,
+  movieTitle,
 }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editComment, setEditComment] = useState(comment);
-  const [editRating, setEditRating] = useState(rating);
+  const authContext = useContext(AuthContext);
+  const isAuthenticated = authContext?.isAuthenticated || false;
+  const accessToken = authContext?.accessToken || null;
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(initialLikes);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Vérifier si l'utilisateur a déjà liké cette critique
+  useEffect(() => {
+    const checkIfLiked = async () => {
+      if (!isAuthenticated) return;
+      
+      try {
+        const response = await axios.get(`http://localhost:3000/api/reviews/${reviewId}/like`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+        setIsLiked(response.data.isLiked);
+      } catch (error) {
+        console.error("Erreur lors de la vérification du like:", error);
+      }
+    };
+
+    if (isAuthenticated) {
+      checkIfLiked();
+    }
+  }, [reviewId, isAuthenticated, accessToken]);
+
+  const handleLike = async () => {
+    if (!isAuthenticated) {
+      toast.error("Veuvez vous connecter pour aimer une critique");
+      return;
+    }
+
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/api/reviews/${reviewId}/like`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
+      setLikeCount(response.data.likes);
+      setIsLiked(response.data.isLiked);
+    } catch (error) {
+      console.error("Erreur lors du like:", error);
+      toast.error("Une erreur est survenue lors du like");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // ⭐ rendu étoiles
-  const renderStars = (rate: number, editable = false) =>
+  const renderStars = (rate: number) =>
     Array.from({ length: 5 }, (_, i) => (
       <Star
         key={i}
-        onClick={editable ? () => setEditRating(i + 1) : undefined}
-        className={`w-5 h-5 ${editable ? "cursor-pointer" : ""} ${
+        className={`w-5 h-5 ${
           i < rate ? "fill-yellow-400 text-yellow-400" : "text-gray-600"
         }`}
       />
@@ -45,79 +100,36 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
       <div className="flex justify-between items-start gap-4">
         {/* Contenu principal */}
         <div className="flex-1">
-          <p className="text-sm text-neutral-400 mb-1">{userName}</p>
-
-          {isEditing ? (
-            <>
-              <textarea
-                value={editComment}
-                onChange={(e) => setEditComment(e.target.value)}
-                className="w-full rounded-xl bg-neutral-950 border border-neutral-700 text-white p-2 mb-3 resize-none focus:ring-2 focus:ring-yellow-500/30"
-                rows={3}
-              />
-              <div className="flex items-center gap-1 mb-3">
-                {renderStars(editRating, true)}
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="flex items-center gap-1">{renderStars(rating)}</div>
-              <p className="text-neutral-200 mt-2">{comment}</p>
-            </>
+          {/* Titre du film si disponible */}
+          {movieTitle && movieId !== undefined && (
+            <div className="mb-1">
+              <Link
+                to={`/movies/${movieId}`}
+                className="text-sm font-semibold text-white hover:text-yellow-400 transition-colors"
+              >
+                {movieTitle}
+              </Link>
+            </div>
           )}
-        </div>
 
-        {/* Actions propriétaire */}
-        {isOwner && (
-          <div className="flex gap-2 shrink-0">
-            {isEditing ? (
-              <>
-                <Button
-                  size="sm"
-                  className="bg-green-600 hover:bg-green-500"
-                  onClick={() => {
-                    onEdit?.(reviewId, editComment, editRating);
-                    setIsEditing(false);
-                  }}
-                >
-                  <Save className="w-4 h-4 mr-1" /> Sauvegarder
-                </Button>
-                <Button
-                  size="sm"
-                  className="bg-gray-700 hover:bg-gray-600"
-                  onClick={() => {
-                    setEditComment(comment);
-                    setEditRating(rating);
-                    setIsEditing(false);
-                  }}
-                >
-                  <X className="w-4 h-4 mr-1" /> Annuler
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  size="sm"
-                  className="bg-neutral-700 hover:bg-neutral-600"
-                  onClick={() => setIsEditing(true)}
-                >
-                  <Edit className="w-4 h-4 mr-1" /> Modifier
-                </Button>
-                <Button
-                  size="sm"
-                  className="bg-red-600 hover:bg-red-500"
-                  onClick={() => onDelete?.(reviewId)}
-                >
-                  <Trash2 className="w-4 h-4 mr-1" /> Supprimer
-                </Button>
-              </>
-            )}
-          </div>
-        )}
+          <p className="text-xs text-neutral-400 mb-1">{userName}</p>
+          <div className="flex items-center gap-1">{renderStars(rating)}</div>
+          <p className="text-neutral-200 mt-2">{comment}</p>
+        </div>
       </div>
 
-      {/* Footer */}
-      <p className="text-xs text-neutral-500 mt-3">{likes} 👍</p>
+      {/* Footer avec bouton de like */}
+      <div className="flex items-center gap-2 mt-3">
+        <button
+          onClick={handleLike}
+          disabled={isLoading}
+          className={`flex items-center gap-1 text-xs ${isLiked ? 'text-blue-400' : 'text-neutral-500'} hover:text-blue-400 transition-colors disabled:opacity-50`}
+          aria-label={isLiked ? "Retirer le like" : "Aimer cette critique"}
+        >
+          <ThumbsUp className="w-4 h-4" fill={isLiked ? 'currentColor' : 'none'} />
+          <span>{likeCount}</span>
+        </button>
+      </div>
     </div>
   );
 };
