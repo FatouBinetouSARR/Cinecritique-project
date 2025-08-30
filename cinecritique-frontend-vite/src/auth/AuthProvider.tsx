@@ -1,3 +1,4 @@
+// cinecritique-frontend-vite/src/auth/AuthProvider.tsx
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { AuthContext } from "../lib/AuthContext";
 import type { User } from "../lib/authTypes";
@@ -11,26 +12,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isAuthenticated = !!accessToken;
 
-  // 🔄 Récupère un nouvel accessToken avec le refreshToken en cookie
   const performRefresh = useCallback(async (): Promise<string | null> => {
     if (refreshInProgressRef.current) return refreshInProgressRef.current;
     refreshInProgressRef.current = (async () => {
       try {
+        console.log("🔄 performRefresh called");
         const res = await apiFetch("/api/auth/refresh", { method: "POST" });
+        console.log("🌐 Refresh response status:", res.status);
         if (!res.ok) return null;
         const data = await res.json();
+        console.log("💡 Refresh response data:", data);
+
         if (data?.accessToken && data?.user) {
           setAccessToken(data.accessToken);
           setUser({ id: data.user.id, email: data.user.email });
-
-          // ✅ Persist
           localStorage.setItem("accessToken", data.accessToken);
           localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
-
           return data.accessToken;
         }
         return null;
-      } catch {
+      } catch (err) {
+        console.error("❌ performRefresh error:", err);
         return null;
       } finally {
         refreshInProgressRef.current = null;
@@ -39,49 +41,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return refreshInProgressRef.current;
   }, []);
 
-  // 🔑 Login
   const login = useCallback(async (email: string, password: string) => {
-    const res = await apiFetch("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
+    console.log("🔑 Login called:", email);
+    const res = await apiFetch("/api/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
     if (!res.ok) throw new Error("Identifiants invalides");
     const data = await res.json();
+    console.log("💡 Login response data:", data);
 
     setUser({ id: data.user.id, email: data.user.email });
     setAccessToken(data.accessToken);
-
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
   }, []);
 
-  // 📝 Register
   const register = useCallback(async (email: string, password: string) => {
-    const res = await apiFetch("/api/auth/register", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
+    console.log("📝 Register called:", email);
+    const res = await apiFetch("/api/auth/register", { method: "POST", body: JSON.stringify({ email, password }) });
     if (!res.ok) throw new Error("Erreur lors de l'inscription");
     const data = await res.json();
+    console.log("💡 Register response data:", data);
 
     setUser({ id: data.user.id, email: data.user.email });
     setAccessToken(data.accessToken);
-
     localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
+    setAccessToken(data.accessToken); // au login, register, refresh, logout
+
   }, []);
 
-  // 🚪 Logout
   const logout = useCallback(async () => {
+    console.log("🚪 Logout called");
     await apiFetch("/api/auth/logout", { method: "POST" });
     setUser(null);
     setAccessToken(null);
-
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
   }, []);
 
-  // 🏁 Initialisation au montage
   useEffect(() => {
     (async () => {
       try {
@@ -100,16 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     })();
   }, [performRefresh]);
 
-  const value = useMemo(
-    () => ({
-      user,
-      accessToken,
-      isAuthenticated,
-      authLoading,
-      login,
-      register,
-      logout,
-    }),
+  const value = useMemo(() => ({ user, accessToken, isAuthenticated, authLoading, login, register, logout }),
     [user, accessToken, isAuthenticated, authLoading, login, register, logout]
   );
 
