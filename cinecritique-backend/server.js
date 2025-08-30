@@ -14,7 +14,7 @@ dotenv.config();
 const User = require("./models/User");
 const Review = require("./models/Review");
 const RefreshToken = require("./models/RefreshToken");
-const reviewRoutes = require("./routes/reviewRoutes.js");
+const reviewRoutes = require("./routes/reviewRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;

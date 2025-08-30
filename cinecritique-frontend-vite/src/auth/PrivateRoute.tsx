@@ -1,7 +1,7 @@
 // src/auth/PrivateRoute.tsx
 import React, { useEffect } from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../lib/useAuth"; // chemin relatif vers ton hook
+import { useAuth } from "../lib/useAuth";
 
 interface PrivateRouteProps {
   children: React.ReactNode;
