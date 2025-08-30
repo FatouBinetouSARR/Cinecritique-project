@@ -1,22 +1,81 @@
-// src/components/critiques/CriticsPage.tsx
-import React, { useState } from "react";
+// src/components/membres/MembrePage.tsx
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { dataUsers } from "../../data/dataUser";
+import { getTopCritics } from "../../api/reviewService";
+
+interface TopCritic {
+  _id: string;
+  reviewCount: number;
+  totalLikes: number;
+  user: {
+    _id: string;
+    username: string;
+    email: string;
+  };
+}
 
 export const CriticsPage: React.FC = () => {
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<"followers" | "likes">("followers");
+  const [sortBy, setSortBy] = useState<"reviewCount" | "totalLikes">("reviewCount");
+  const [critics, setCritics] = useState<TopCritic[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const parseFollowers = (followers: string) =>
-    followers.includes("k") ? parseFloat(followers) * 1000 : parseInt(followers.replace(/\D/g, ""), 10);
+  useEffect(() => {
+    const fetchCritics = async () => {
+      try {
+        setLoading(true);
+        const data = await getTopCritics(50); // Récupérer plus de critiques
+        setCritics(data);
+        setError(null);
+      } catch (err) {
+        console.error('Erreur lors du chargement des critiques:', err);
+        setError('Erreur lors du chargement des critiques');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const sortedUsers = [...dataUsers]
-    .filter((u) => u.name.toLowerCase().includes(search.toLowerCase()))
+    fetchCritics();
+  }, []);
+
+  const sortedUsers = [...critics]
+    .filter((critic) => 
+      critic.user?.username?.toLowerCase().includes(search.toLowerCase()) ||
+      critic.user?.email?.toLowerCase().includes(search.toLowerCase())
+    )
     .sort((a, b) =>
-      sortBy === "followers" ? parseFollowers(b.followers) - parseFollowers(a.followers) : b.likes - a.likes
+      sortBy === "reviewCount" ? b.reviewCount - a.reviewCount : b.totalLikes - a.totalLikes
     );
 
   const popularMembers = sortedUsers.slice(0, 5);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen text-white bg-neutral-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin h-8 w-8 border-2 border-white border-t-transparent rounded-full mx-auto mb-4" />
+          <p>Chargement des critiques...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen text-white bg-neutral-950 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="bg-yellow-400 text-black px-4 py-2 rounded hover:bg-yellow-500 transition-colors"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen text-white bg-neutral-950">
@@ -37,11 +96,11 @@ export const CriticsPage: React.FC = () => {
               />
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as "followers" | "likes")}
+                onChange={(e) => setSortBy(e.target.value as "reviewCount" | "totalLikes")}
                 className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-white"
               >
-                <option value="followers">Popularité</option>
-                <option value="likes">Likes</option>
+                <option value="reviewCount">Nombre de critiques</option>
+                <option value="totalLikes">Total des likes</option>
               </select>
             </div>
           </div>
@@ -55,31 +114,41 @@ export const CriticsPage: React.FC = () => {
 
           {/* Users list */}
           <div className="divide-y divide-gray-800 border border-gray-800 rounded-b">
-            {sortedUsers.map((user, index) => (
-              <div
-                key={user.id}
-                className="grid grid-cols-3 items-center px-4 py-3 hover:bg-gray-800 transition-colors"
-              >
-                {/* Nom + avatar */}
-                <div className="flex items-center gap-3">
-                  <span className="text-gray-500 w-6">{index + 1}</span>
-                  <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
-                  <div className="flex flex-col">
-                    <Link to={`/profile/${user.id}`} className="font-medium hover:underline">
-                      {user.name}
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Likes / Goûts */}
-                <span className="text-center text-gray-300">
-                  ❤️ {user.likes.toLocaleString()}
-                </span>
-                <span className="text-right text-gray-400 text-sm">
-                  {user.reviews.toLocaleString()}
-                </span>
+            {sortedUsers.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                Aucun critique trouvé
               </div>
-            ))}
+            ) : (
+              sortedUsers.map((critic, index) => (
+                <div
+                  key={critic._id}
+                  className="grid grid-cols-3 items-center px-4 py-3 hover:bg-gray-800 transition-colors"
+                >
+                  {/* Nom + avatar */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-gray-500 w-6">{index + 1}</span>
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 flex items-center justify-center">
+                      <span className="text-black font-bold text-sm">
+                        {critic.user?.username?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <Link to={`/profile/${critic._id}`} className="font-medium hover:underline">
+                        {critic.user?.username || 'Utilisateur inconnu'}
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Likes / Goûts */}
+                  <span className="text-center text-gray-300">
+                    ❤️ {critic.totalLikes.toLocaleString()}
+                  </span>
+                  <span className="text-right text-gray-400 text-sm">
+                    {critic.reviewCount.toLocaleString()}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -87,17 +156,21 @@ export const CriticsPage: React.FC = () => {
         <aside className="w-64 hidden lg:block">
           <h3 className="text-xl font-bold mb-4">Membres populaires</h3>
           <div className="flex flex-col divide-y divide-gray-800 border border-gray-800 rounded-md">
-            {popularMembers.map((user) => (
+            {popularMembers.map((critic) => (
               <Link
-                key={user.id}
-                to={`/profile/${user.id}`}
+                key={critic._id}
+                to={`/profile/${critic._id}`}
                 className="flex items-center gap-3 p-3 hover:bg-gray-800 transition-colors"
               >
-                <img src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover" />
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 flex items-center justify-center">
+                  <span className="text-black font-bold">
+                    {critic.user?.username?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </div>
                 <div>
-                  <p className="font-medium">{user.name}</p>
+                  <p className="font-medium">{critic.user?.username || 'Utilisateur inconnu'}</p>
                   <p className="text-gray-400 text-sm">
-                    {user.reviews.toLocaleString()} critiques
+                    {critic.reviewCount.toLocaleString()} critiques
                   </p>
                 </div>
               </Link>

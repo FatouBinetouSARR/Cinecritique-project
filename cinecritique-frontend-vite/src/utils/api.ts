@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  // Ensure we hit the backend's /api router prefix
+  // VITE_API_URL is the backend origin WITHOUT /api; we append it here
   baseURL: `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api`,
   withCredentials: true, // si tu utilises refreshToken en cookie
 });

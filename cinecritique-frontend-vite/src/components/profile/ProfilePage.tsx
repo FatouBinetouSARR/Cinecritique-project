@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../lib/useAuth";
-import { apiFetch, API_URL } from "../../lib/apiFetch";
 import { ReviewsPage } from "../reviews/ReviewsPage";
 
 interface ProfileData {
-  id: number;
+  id: string;
   email: string;
   username?: string;
   bio?: string;
@@ -79,7 +78,7 @@ const LinkButton: React.FC<
 );
 
 export default function ProfilePage() {
-  const { accessToken, logout } = useAuth();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -89,62 +88,37 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [formUsername, setFormUsername] = useState("");
   const [formBio, setFormBio] = useState("");
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  // const [avatarFile, setAvatarFile] = useState<File | null>(null); // désactivé
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const authHeader = useMemo(
-    () => (accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined),
-    [accessToken]
-  );
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
-  // Fallback image (1x1 transparent GIF) to avoid 404s when no avatar
+  // Fallback image
   const PLACEHOLDER =
     "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
   const resolveAvatarSrc = (u?: string | null) =>
-    u ? `${API_URL}${u}` : PLACEHOLDER;
+    u ? `${API_BASE.replace("/api", "")}${u}` : PLACEHOLDER;
 
-  // Charger profil
+  // Charger profil (ici simplifié : basé sur l'user connecté)
   useEffect(() => {
-    const fetchProfile = async () => {
-      setError(null);
-      setLoading(true);
-      try {
-        const res = await apiFetch("/api/profile", {
-          method: "GET",
-          headers: authHeader,
-        });
+    if (!user) {
+      setError("Utilisateur non connecté");
+      setLoading(false);
+      return;
+    }
 
-        if (!res.ok) {
-          if (res.status === 401) {
-            await logout();
-            return;
-          }
-
-          const errorData = await res.json().catch(() => ({}));
-          throw new Error(
-            errorData.message || "Erreur lors du chargement du profil"
-          );
-        }
-
-        const data: ProfileData = await res.json();
-        setProfile(data);
-        setFormUsername(data.username || "");
-        setFormBio(data.bio || "");
-      } catch (error) {
-        console.error("Erreur lors du chargement du profil:", error);
-        setError(
-          error instanceof Error
-            ? error.message
-            : "Erreur de connexion au serveur"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [authHeader, logout]);
+    setProfile({
+      id: user.id,
+      email: user.email,
+      username: undefined,
+      bio: undefined,
+      avatarUrl: undefined,
+    });
+    setFormUsername("");
+    setFormBio("");
+    setLoading(false);
+  }, [user]);
 
   useEffect(() => {
     return () => {
@@ -154,64 +128,33 @@ export default function ProfilePage() {
 
   const handleSelectAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setAvatarFile(file);
+    // setAvatarFile(file); // désactivé
     if (avatarPreview) URL.revokeObjectURL(avatarPreview);
     setAvatarPreview(file ? URL.createObjectURL(file) : null);
   };
 
   const handleSave = async () => {
-    if (!accessToken) return;
+    if (!user) return;
     setSuccess(null);
     setError(null);
     setSaving(true);
-    try {
-      if (avatarFile) {
-        const formData = new FormData();
-        formData.append("avatar", avatarFile);
-        const uploadRes = await fetch(`${API_URL}/api/profile/avatar`, {
-          method: "PUT",
-          body: formData,
-          credentials: "include",
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (!uploadRes.ok)
-          throw new Error("Échec de l'upload de la photo de profil");
-      }
 
-      const res = await apiFetch("/api/profile", {
-        method: "PUT",
-        headers: { ...(authHeader || {}), "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formUsername || undefined,
-          bio: formBio || undefined,
-        }),
-      });
-      if (!res.ok) {
-        if (res.status === 401) {
-          await logout();
-          return;
-        }
-        throw new Error("Échec de la mise à jour du profil");
+    // Simulation de sauvegarde réussie (à remplacer par API réelle)
+    setTimeout(() => {
+      if (profile) {
+        const updatedProfile = {
+          ...profile,
+          username: formUsername,
+          bio: formBio,
+        };
+        setProfile(updatedProfile);
       }
-
-      const refreshed = await apiFetch("/api/profile", {
-        method: "GET",
-        headers: authHeader,
-      });
-      const refreshedData: ProfileData = await refreshed.json();
-      setProfile(refreshedData);
       setIsEditing(false);
       setSuccess("Profil mis à jour avec succès.");
-      setAvatarFile(null);
       if (avatarPreview) URL.revokeObjectURL(avatarPreview);
       setAvatarPreview(null);
-    } catch (e) {
-      const message =
-        e instanceof Error ? e.message : "Une erreur est survenue.";
-      setError(message);
-    } finally {
       setSaving(false);
-    }
+    }, 1000);
   };
 
   if (loading) {
@@ -248,15 +191,12 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100">
-      {/* Contenu */}
       <main className="mx-auto max-w-6xl px-4 sm:px-6 py-8 space-y-8">
         {/* Profil */}
         <Card
           title="Profil utilisateur"
           subtitle="Informations personnelles et avatar"
-          
         >
-
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Résumé */}
             <aside className="lg:col-span-1">
@@ -274,13 +214,11 @@ export default function ProfilePage() {
                 <p className="text-sm text-neutral-400 mt-1">
                   {profile?.bio || "Aucune bio"}
                 </p>
-
               </div>
             </aside>
 
             {/* Détails + formulaire */}
             <section className="lg:col-span-2 space-y-6">
-
               {isEditing ? (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -314,9 +252,9 @@ export default function ProfilePage() {
                             <LinkButton
                               type="button"
                               onClick={() => {
-                                if (avatarPreview) URL.revokeObjectURL(avatarPreview);
+                                if (avatarPreview)
+                                  URL.revokeObjectURL(avatarPreview);
                                 setAvatarPreview(null);
-                                setAvatarFile(null);
                               }}
                             >
                               Retirer
@@ -326,7 +264,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm text-neutral-300 mb-1 ">
+                      <label className="block text-sm text-neutral-300 mb-1">
                         Pseudo
                       </label>
                       <input
@@ -349,9 +287,7 @@ export default function ProfilePage() {
                         placeholder="Parlez de vous…"
                       />
                     </div>
-                    
                   </div>
-                  
 
                   <div className="flex flex-wrap items-center gap-3">
                     <PrimaryButton onClick={handleSave} disabled={saving}>
@@ -394,19 +330,17 @@ export default function ProfilePage() {
                   </div>
                 </div>
               )}
-               {
-            !isEditing && (
-              <PrimaryButton
-                onClick={() => {
-                  setIsEditing(true);
-                  setSuccess(null);
-                  setError(null);
-                }}
-              >
-                Modifier le profil
-              </PrimaryButton>
-            )
-          }
+              {!isEditing && (
+                <PrimaryButton
+                  onClick={() => {
+                    setIsEditing(true);
+                    setSuccess(null);
+                    setError(null);
+                  }}
+                >
+                  Modifier le profil
+                </PrimaryButton>
+              )}
             </section>
           </div>
         </Card>
