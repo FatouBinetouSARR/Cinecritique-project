@@ -28,7 +28,7 @@ const FRONTEND_ORIGIN =
 // CORS
 app.use(
   cors({
-    origin: isProduction ? FRONTEND_ORIGIN : "http://localhost:5173", // ⚠️ adapte au port Vite
+    origin: isProduction ? FRONTEND_ORIGIN : ["http://localhost:5173", "http://localhost:5174"], // Support des deux ports
     credentials: true,
   })
 );

@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { AuthContext } from "../lib/AuthContext";
 import type { User } from "../lib/authTypes";
-import { apiFetch } from "../lib/apiFetch";
+import { apiFetch, setAccessToken as setApiFetchToken } from "../lib/apiFetch";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User>(null);
@@ -10,9 +10,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Wrapper pour mettre à jour à la fois l'état local et le token dans apiFetch
   const setAccessToken = useCallback((token: string | null) => {
     _setAccessToken(token);
-    // Mettre à jour le token dans le module apiFetch
+    // Synchroniser avec apiFetch.ts
+    setApiFetchToken(token);
+    // Mettre à jour le localStorage
     if (typeof window !== 'undefined') {
-      window.localStorage.setItem('accessToken', token || '');
+      if (token) {
+        window.localStorage.setItem('accessToken', token);
+      } else {
+        window.localStorage.removeItem('accessToken');
+      }
     }
   }, []);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
@@ -60,9 +66,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser({ id: data.user.id, email: data.user.email });
     setAccessToken(data.accessToken);
 
-    localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
-  }, []);
+  }, [setAccessToken]);
 
   // 📝 Register
   const register = useCallback(async (email: string, password: string) => {
@@ -76,9 +81,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser({ id: data.user.id, email: data.user.email });
     setAccessToken(data.accessToken);
 
-    localStorage.setItem("accessToken", data.accessToken);
     localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
-  }, []);
+  }, [setAccessToken]);
 
   // 🚪 Logout
   const logout = useCallback(async () => {
