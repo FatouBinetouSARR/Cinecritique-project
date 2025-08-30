@@ -3,11 +3,11 @@ import { AuthContext } from "../lib/AuthContext";
 import type { User } from "../lib/authTypes";
 import { apiFetch, setAccessToken as setApiFetchToken } from "../lib/apiFetch";
 
+// Decode simple JWT payload
 function decodeJwt(token: string): { exp?: number } | null {
   try {
     const payload = token.split(".")[1];
-    const decoded = JSON.parse(atob(payload));
-    return decoded;
+    return JSON.parse(atob(payload));
   } catch {
     return null;
   }
@@ -24,55 +24,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAuthenticated = !!accessToken;
 
   // Nettoyage du timer
-  const clearRefreshTimer = () => {
+  const clearRefreshTimer = useCallback(() => {
     if (refreshTimeoutRef.current) {
       clearTimeout(refreshTimeoutRef.current);
       refreshTimeoutRef.current = null;
     }
-  };
+  }, []);
 
-  /**
-   * 🔄 Refresh du token
-   */
+  // 🔄 Refresh du token
   const performRefresh = useCallback(async (): Promise<string | null> => {
     if (refreshInProgressRef.current) return refreshInProgressRef.current;
+
     refreshInProgressRef.current = (async () => {
       try {
-        console.log("🔄 performRefresh called");
         const res = await apiFetch("/api/auth/refresh", { method: "POST" });
-        console.log("🌐 Refresh response status:", res.status);
 
         if (!res.ok) {
           setUser(null);
-          setAccessToken(null);
+          _setAccessToken(null);
           return null;
         }
 
         const data = await res.json();
-        console.log("💡 Refresh response data:", data);
 
         if (data?.accessToken && data?.user) {
-          setAccessToken(data.accessToken);
+          _setAccessToken(data.accessToken);
           setUser({ id: data.user.id, email: data.user.email });
           localStorage.setItem("user", JSON.stringify({ id: data.user.id, email: data.user.email }));
           return data.accessToken;
         }
+
         return null;
       } catch (err) {
         console.error("❌ performRefresh error:", err);
         setUser(null);
-        setAccessToken(null);
+        _setAccessToken(null);
         return null;
       } finally {
         refreshInProgressRef.current = null;
       }
     })();
+
     return refreshInProgressRef.current;
   }, []);
 
-  /**
-   * ✅ Met à jour token + localStorage + timer
-   */
+  // ✅ Met à jour token + localStorage + timer
   const setAccessToken = useCallback(
     (token: string | null) => {
       _setAccessToken(token);
@@ -90,7 +86,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const now = Date.now();
             const refreshDelay = Math.max(expiresAt - now - 60_000, 5000); // 1 min avant expiration
             refreshTimeoutRef.current = window.setTimeout(() => {
-              console.log("⏰ Token nearing expiry, performing refresh...");
               performRefresh();
             }, refreshDelay);
           }
@@ -99,19 +94,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     },
-    [performRefresh]
+    [clearRefreshTimer, performRefresh]
   );
 
+  // 🔑 Login
   const login = useCallback(
     async (email: string, password: string) => {
-      console.log("🔑 Login called:", email);
       const res = await apiFetch("/api/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
       if (!res.ok) throw new Error("Identifiants invalides");
       const data = await res.json();
-      console.log("💡 Login response data:", data);
 
       setUser({ id: data.user.id, email: data.user.email });
       setAccessToken(data.accessToken);
@@ -120,16 +114,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [setAccessToken]
   );
 
+  // 📝 Register
   const register = useCallback(
     async (email: string, password: string) => {
-      console.log("📝 Register called:", email);
       const res = await apiFetch("/api/auth/register", {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
       if (!res.ok) throw new Error("Erreur lors de l'inscription");
       const data = await res.json();
-      console.log("💡 Register response data:", data);
 
       setUser({ id: data.user.id, email: data.user.email });
       setAccessToken(data.accessToken);
@@ -138,8 +131,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [setAccessToken]
   );
 
+  // 🚪 Logout
   const logout = useCallback(async () => {
-    console.log("🚪 Logout called");
     try {
       await apiFetch("/api/auth/logout", { method: "POST" });
     } catch (error) {
@@ -151,7 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem("user");
       clearRefreshTimer();
     }
-  }, [setUser, setAccessToken]);
+  }, [setAccessToken, clearRefreshTimer]);
 
   // Initialisation au montage
   useEffect(() => {
@@ -174,7 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       clearRefreshTimer();
     };
-  }, [performRefresh, setAccessToken]);
+  }, [performRefresh, setAccessToken, clearRefreshTimer]);
 
   const value = useMemo(
     () => ({ user, accessToken, isAuthenticated, authLoading, login, register, logout }),

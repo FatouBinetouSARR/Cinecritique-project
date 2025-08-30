@@ -1,4 +1,3 @@
-// src/components/reviews/ReviewsPage.tsx
 import { useEffect, useMemo, useState } from "react";
 import { Film, Star } from "lucide-react";
 import api from "../../utils/api";
@@ -8,13 +7,8 @@ import axios from "axios";
 
 type ApiErrorData = { message?: string };
 function hasApiMessage(data: unknown): data is { message: string } {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    typeof (data as ApiErrorData).message === "string"
-  );
+  return typeof data === "object" && data !== null && typeof (data as ApiErrorData).message === "string";
 }
-
 function getErrorMessage(e: unknown, fallback: string) {
   if (axios.isAxiosError(e)) {
     const data = e.response?.data;
@@ -25,15 +19,14 @@ function getErrorMessage(e: unknown, fallback: string) {
   return fallback;
 }
 
-// Hook pour récupérer l'utilisateur connecté
 const useAuth = () => {
-  const raw = localStorage.getItem("user"); // adapter selon ton stockage JWT / user
+  const raw = localStorage.getItem("user");
   return raw ? JSON.parse(raw) : null;
 };
 
 interface ReviewsPageProps {
   mode?: "all" | "mine";
-  movieId?: number; // on garde number
+  movieId?: number;
 }
 
 export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId }) => {
@@ -47,7 +40,6 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
   const [error, setError] = useState<string | null>(null);
   const [titles, setTitles] = useState<Record<string, string>>({});
 
-  // Charger les critiques
   useEffect(() => {
     const fetchReviews = async () => {
       setLoading(true);
@@ -55,11 +47,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
       try {
         if (mode === "mine") {
           const { data } = await api.get<Review[]>("/reviews/mine");
-          setReviews(
-            movieId
-              ? data.filter(r => r.movieId.toString() === movieId.toString()) // conversion string
-              : data
-          );
+          setReviews(movieId ? data.filter(r => r.movieId.toString() === movieId.toString()) : data);
         } else {
           if (!movieId) {
             setReviews([]);
@@ -78,7 +66,6 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
     fetchReviews();
   }, [mode, movieId]);
 
-  // Charger les titres TMDB pour les critiques personnelles sans movieId précis
   useEffect(() => {
     const loadTitles = async () => {
       if (mode !== "mine" || movieId || reviews.length === 0) return;
@@ -91,24 +78,20 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
           if (!res.ok) continue;
           const data = await res.json();
           next[id] = data.title || `Film #${id}`;
-        } catch {
-          // ignore
+        } catch (err) {
+          console.warn(`Impossible de charger le titre du film ${id}`, err);
         }
       }
+
       setTitles(prev => ({ ...prev, ...next }));
     };
     loadTitles();
   }, [mode, movieId, reviews]);
 
-  // Ajouter une critique
   const handleAddReview = async () => {
     if (!movieId || !newReview.trim() || rating === 0) return;
     try {
-      const { data } = await api.post<Review>(`/movies/${movieId}/reviews`, {
-        movieId,
-        rating,
-        comment: newReview,
-      });
+      const { data } = await api.post<Review>(`/movies/${movieId}/reviews`, { movieId, rating, comment: newReview });
       setReviews(prev => [data, ...prev]);
       setNewReview("");
       setRating(0);
@@ -117,7 +100,6 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
     }
   };
 
-  // Supprimer
   const handleDeleteReview = async (id: string) => {
     try {
       const found = reviews.find(r => r._id === id);
@@ -130,23 +112,18 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
     }
   };
 
-  // Modifier
   const handleEditReview = async (id: string, updatedText: string, updatedRating: number) => {
     try {
       const found = reviews.find(r => r._id === id);
       const movieIdToUse = movieId || found?.movieId;
       if (!movieIdToUse) throw new Error("movieId introuvable pour cette critique");
-      const { data } = await api.put<Review>(`/movies/${movieIdToUse}/reviews/${id}`, {
-        comment: updatedText,
-        rating: updatedRating,
-      });
+      const { data } = await api.put<Review>(`/movies/${movieIdToUse}/reviews/${id}`, { comment: updatedText, rating: updatedRating });
       setReviews(prev => prev.map(r => (r._id === id ? data : r)));
     } catch (e: unknown) {
       setError(getErrorMessage(e, "Impossible de modifier"));
     }
   };
 
-  // Moyenne des notes locale
   const average = useMemo(() => {
     if (reviews.length === 0) return 0;
     return reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
@@ -168,15 +145,9 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
           <div className="container mx-auto px-4 py-8">
             <div className="flex items-center gap-3 mb-2">
               <Film className="w-8 h-8 text-yellow-400" />
-              <h1 className="text-3xl font-bold text-white">
-                {mode === "mine" ? "Mes critiques" : "Toutes les critiques"}
-              </h1>
+              <h1 className="text-3xl font-bold text-white">{mode === "mine" ? "Mes critiques" : "Toutes les critiques"}</h1>
             </div>
-            <p className="text-gray-400">
-              {mode === "mine"
-                ? "Gérez et modifiez vos critiques de films"
-                : "Découvrez les avis récents et populaires des spectateurs"}
-            </p>
+            <p className="text-gray-400">{mode === "mine" ? "Gérez et modifiez vos critiques de films" : "Découvrez les avis récents et populaires des spectateurs"}</p>
             <span className="text-sm text-gray-400 mt-2 block">{reviews.length} Critiques</span>
           </div>
         </header>
@@ -199,12 +170,7 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
               className="w-full rounded-md bg-gray-900 border border-gray-700 text-white p-2 mb-3"
               rows={3}
             />
-            <button
-              onClick={handleAddReview}
-              className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded"
-            >
-              Publier
-            </button>
+            <button onClick={handleAddReview} className="bg-yellow-500 hover:bg-yellow-400 text-black font-semibold px-4 py-2 rounded">Publier</button>
           </div>
         )}
 
@@ -214,16 +180,17 @@ export const ReviewsPage: React.FC<ReviewsPageProps> = ({ mode = "all", movieId 
           reviews.map(r => (
             <ReviewCard
               key={r._id}
-              reviewId={r._id.toString()} // conversion en string
+              reviewId={r._id.toString()}
               comment={r.comment}
               rating={r.rating}
               userName={r.user?.username || r.user?.email || "Anonyme"}
               likes={r.likes || 0}
               isOwner={r.user?._id === currentUserId}
-              onEdit={handleEditReview}
+              onUpdate={handleEditReview}
               onDelete={handleDeleteReview}
               movieId={r.movieId}
               movieTitle={titles[r.movieId.toString()]}
+              userId={r.user?._id}
             />
           ))
         )}

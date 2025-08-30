@@ -2,22 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ReviewCard } from "../reviews/ReviewCard";
-import { getPopularReviews, getTopCritics } from "../../api/reviewService";
-
-interface Review {
-  _id: string;
-  movieId: string;
-  rating: number;
-  comment: string;
-  likes: number;
-  user: {
-    _id: string;
-    username: string;
-    email: string;
-  };
-  createdAt: string;
-  updatedAt: string;
-}
+import { getPopularReviews, getTopCritics, updateReview, deleteReview } from "../../api/reviewService";
+import type { Review } from "../../types/review";
 
 interface TopCritic {
   _id: string;
@@ -36,6 +22,9 @@ export const ReviewsFeed: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Récupérer le token depuis le localStorage ou le contexte
+  const token = localStorage.getItem("token") || "";
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -44,7 +33,6 @@ export const ReviewsFeed: React.FC = () => {
           getPopularReviews(5),
           getTopCritics(3)
         ]);
-        
         setPopularReviews(reviewsData);
         setTopCritics(criticsData);
         setError(null);
@@ -59,37 +47,20 @@ export const ReviewsFeed: React.FC = () => {
     fetchData();
   }, []);
 
-  if (loading) {
-    return (
-      <section className="py-12 px-4 md:px-8 bg-neutral-950">
-        <div className="text-center text-white">Chargement...</div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="py-12 px-4 md:px-8 bg-neutral-950">
-        <div className="text-center text-red-400">{error}</div>
-      </section>
-    );
-  }
+  if (loading) return <div className="text-center text-white py-12">Chargement...</div>;
+  if (error) return <div className="text-center text-red-400 py-12">{error}</div>;
 
   return (
     <section className="py-12 px-4 md:px-8 grid grid-cols-1 lg:grid-cols-3 gap-8 bg-neutral-950">
-      {/* Colonne principale : Feed de reviews */}
       <div className="lg:col-span-2 flex flex-col gap-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-white">Avis populaires</h2>
-          <Link
-            to="/reviews"
-            className="text-yellow-400 hover:underline font-medium"
-          >
+          <Link to="/reviews" className="text-yellow-400 hover:underline font-medium">
             Plus →
           </Link>
         </div>
 
-{popularReviews.length === 0 ? (
+        {popularReviews.length === 0 ? (
           <div className="text-center py-8 text-gray-400">
             <p>Aucun avis populaire disponible pour le moment.</p>
             <p className="text-sm mt-2">Soyez le premier à laisser une critique !</p>
@@ -106,29 +77,23 @@ export const ReviewsFeed: React.FC = () => {
                 movieId={review.movieId}
                 movieTitle={`Film #${review.movieId}`}
                 userId={review.user?._id}
-                onUpdate={() => {
-                  // Recharger les données après modification
-                  const fetchData = async () => {
-                    try {
-                      const reviewsData = await getPopularReviews(5);
-                      setPopularReviews(reviewsData);
-                    } catch (err) {
-                      console.error('Erreur lors du rechargement:', err);
-                    }
-                  };
-                  fetchData();
+                onUpdate={async (id, updatedText, updatedRating) => {
+                  try {
+                    await updateReview(review.movieId, id, { comment: updatedText, rating: updatedRating }, token);
+                    const reviewsData = await getPopularReviews(5);
+                    setPopularReviews(reviewsData);
+                  } catch (err) {
+                    console.error('Erreur lors de la mise à jour :', err);
+                  }
                 }}
-                onDelete={() => {
-                  // Recharger les données après suppression
-                  const fetchData = async () => {
-                    try {
-                      const reviewsData = await getPopularReviews(5);
-                      setPopularReviews(reviewsData);
-                    } catch (err) {
-                      console.error('Erreur lors du rechargement:', err);
-                    }
-                  };
-                  fetchData();
+                onDelete={async (id) => {
+                  try {
+                    await deleteReview(review.movieId, id, token);
+                    const reviewsData = await getPopularReviews(5);
+                    setPopularReviews(reviewsData);
+                  } catch (err) {
+                    console.error('Erreur lors de la suppression :', err);
+                  }
                 }}
               />
             </div>
@@ -136,7 +101,6 @@ export const ReviewsFeed: React.FC = () => {
         )}
       </div>
 
-      {/* Sidebar : Critiqueurs populaires */}
       <aside className="lg:col-span-1">
         <div className="bg-neutral-900 rounded-lg p-6">
           <h3 className="text-xl font-bold text-white mb-6">Critiqueurs populaires</h3>
@@ -156,17 +120,11 @@ export const ReviewsFeed: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-medium truncate">
-                      {critic.user?.username || "Utilisateur inconnu"}
-                    </p>
-                    <p className="text-gray-400 text-sm">
-                      {critic.reviewCount} critiques
-                    </p>
+                    <p className="text-white font-medium truncate">{critic.user?.username || "Utilisateur inconnu"}</p>
+                    <p className="text-gray-400 text-sm">{critic.reviewCount} critiques</p>
                   </div>
                   <div className="flex-shrink-0">
-                    <span className="bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded">
-                      #{index + 1}
-                    </span>
+                    <span className="bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded">#{index + 1}</span>
                   </div>
                 </div>
               ))
